@@ -1,6 +1,6 @@
 "use client";
 
-import { Expand, LayoutDashboard, LogOut, PackageSearch, Settings, ClipboardList, LucideIcon } from "lucide-react";
+import { Expand, LayoutDashboard, LogOut, PackageSearch, Settings, ClipboardList, LucideIcon, Users } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect } from "react";
@@ -14,6 +14,7 @@ const navItems: NavItem[] = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/produtos", label: "Pesquisa/Produtos", icon: PackageSearch },
   { href: "/solicitacoes", label: "Solicitacoes", icon: ClipboardList },
+  { href: "/usuarios", label: "Usuarios", icon: Users },
   { href: "/administrativo", label: "Administrativo", icon: Settings }
 ];
 

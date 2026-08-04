@@ -27,12 +27,25 @@ export function LoginForm() {
     setError("");
     setSubmitting(true);
 
-    const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
+    const { data, error: signInError } = await supabase.auth.signInWithPassword({ email, password });
+
+    if (signInError) {
+      setSubmitting(false);
+      setError(signInError.message);
+      return;
+    }
+
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("active")
+      .eq("id", data.user.id)
+      .maybeSingle();
 
     setSubmitting(false);
 
-    if (signInError) {
-      setError(signInError.message);
+    if (profile && profile.active === false) {
+      await supabase.auth.signOut();
+      setError("Usuário desativado. Fale com um administrador.");
       return;
     }
 
