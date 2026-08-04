@@ -92,8 +92,8 @@ export default function SolicitacoesPage() {
       <section>
         <div className="flex flex-wrap items-end justify-between gap-4">
           <div>
-            <p className="text-xs font-black uppercase tracking-[0.18em] text-muted">Reposicao</p>
-            <h1 className="mt-2 text-3xl font-black text-graphite">Solicitacoes de Reposicao</h1>
+            <p className="text-xs font-black uppercase tracking-[0.18em] text-muted">Reposição</p>
+            <h1 className="mt-2 text-3xl font-black text-graphite">Solicitações de Reposição</h1>
           </div>
           <label className="block min-w-64">
             <span className="text-sm font-bold text-graphite">Status</span>
@@ -104,7 +104,7 @@ export default function SolicitacoesPage() {
             >
               <option value="all">Todos</option>
               <option value="pending">Pendente</option>
-              <option value="in_separation">Em separacao</option>
+              <option value="in_separation">Em separação</option>
               <option value="replenished">Reposto</option>
               <option value="cancelled">Cancelado</option>
             </select>
@@ -124,9 +124,9 @@ export default function SolicitacoesPage() {
             </thead>
             <tbody>
               {loading ? (
-                <tr><td className="px-4 py-8 text-muted" colSpan={6}>Carregando solicitacoes...</td></tr>
+                <tr><td className="px-4 py-8 text-muted" colSpan={6}>Carregando solicitações...</td></tr>
               ) : requests.length === 0 ? (
-                <tr><td className="px-4 py-8 text-muted" colSpan={6}>Nenhuma solicitacao encontrada.</td></tr>
+                <tr><td className="px-4 py-8 text-muted" colSpan={6}>Nenhuma solicitação encontrada.</td></tr>
               ) : (
                 requests.map((request) => (
                   <tr
@@ -154,7 +154,7 @@ export default function SolicitacoesPage() {
             <div className="flex items-start justify-between gap-4 border-b border-charcoal/10 pb-4">
               <div>
                 <p className="font-mono text-xs text-muted">{selected.id}</p>
-                <h2 className="mt-2 text-xl font-black text-graphite">Detalhe da solicitacao</h2>
+                <h2 className="mt-2 text-xl font-black text-graphite">Detalhe da solicitação</h2>
               </div>
               <StatusBadge status={selected.status} />
             </div>
@@ -184,10 +184,10 @@ export default function SolicitacoesPage() {
             </div>
 
             <div className="mt-6">
-              <h3 className="text-sm font-black uppercase tracking-[0.14em] text-muted">Historico</h3>
+              <h3 className="text-sm font-black uppercase tracking-[0.14em] text-muted">Histórico</h3>
               <div className="mt-3 space-y-3">
                 {events.length === 0 ? (
-                  <p className="text-sm text-muted">Sem historico registrado.</p>
+                  <p className="text-sm text-muted">Sem histórico registrado.</p>
                 ) : (
                   events.map((event) => (
                     <div className="border-l-4 border-lime pl-3" key={event.id}>
@@ -211,16 +211,16 @@ export default function SolicitacoesPage() {
                   type="button"
                 >
                   {nextStatus === "cancelled" ? <Ban className="h-4 w-4" /> : nextStatus === "replenished" ? <CheckCircle2 className="h-4 w-4" /> : <ChevronsRight className="h-4 w-4" />}
-                  {nextStatus === "cancelled" ? "Cancelar" : `Avancar para ${statusLabels[nextStatus]}`}
+                  {nextStatus === "cancelled" ? "Cancelar" : `Avançar para ${statusLabels[nextStatus]}`}
                 </button>
               ))}
             </div>
           </>
         ) : (
           <div className="py-10">
-            <h2 className="text-xl font-black text-graphite">Selecione uma solicitacao</h2>
+            <h2 className="text-xl font-black text-graphite">Selecione uma solicitação</h2>
             <p className="mt-2 text-sm leading-6 text-muted">
-              Clique em uma linha da tabela para ver itens, historico e acoes de status.
+              Clique em uma linha da tabela para ver itens, histórico e ações de status.
             </p>
           </div>
         )}

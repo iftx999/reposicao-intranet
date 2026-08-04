@@ -152,7 +152,7 @@ export default function ProdutosPage() {
         <table className="w-full min-w-[850px] border-collapse text-left text-sm">
           <thead className="bg-charcoal text-white">
             <tr>
-              {["Nome", "Categoria", "Setor", "Unidade", "Ativo", "Favorito", "Acoes"].map((heading) => (
+              {["Nome", "Categoria", "Setor", "Unidade", "Ativo", "Favorito", "Ações"].map((heading) => (
                 <th className="px-4 py-4 font-black" key={heading}>{heading}</th>
               ))}
             </tr>
@@ -169,8 +169,8 @@ export default function ProdutosPage() {
                   <td className="px-4 py-4 text-muted">{product.category}</td>
                   <td className="px-4 py-4 text-muted">{product.sector_id}</td>
                   <td className="px-4 py-4 text-muted">{product.unit}</td>
-                  <td className="px-4 py-4">{product.active ? "Sim" : "Nao"}</td>
-                  <td className="px-4 py-4">{product.favorite ? "Sim" : "Nao"}</td>
+                  <td className="px-4 py-4">{product.active ? "Sim" : "Não"}</td>
+                  <td className="px-4 py-4">{product.favorite ? "Sim" : "Não"}</td>
                   <td className="px-4 py-4">
                     <div className="flex gap-2">
                       <button

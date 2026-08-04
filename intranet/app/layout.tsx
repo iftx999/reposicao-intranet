@@ -4,7 +4,7 @@ import { AuthProvider } from "@/components/AuthProvider";
 
 export const metadata: Metadata = {
   title: "BAR Intranet",
-  description: "Painel administrativo para reposicao de bar"
+  description: "Painel administrativo para reposição de bar"
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
