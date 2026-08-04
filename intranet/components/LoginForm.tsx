@@ -61,7 +61,7 @@ export function LoginForm() {
             <p className="text-xs font-black uppercase tracking-[0.22em] text-muted">BAR Intranet</p>
             <h1 className="mt-3 text-5xl font-black text-graphite">Acesso</h1>
             <p className="mt-3 text-sm leading-6 text-muted">
-              Entre com seu email e senha para administrar produtos e solicitacoes de reposicao.
+              Entre com seu email e senha para administrar produtos e solicitações de reposição.
             </p>
           </div>
 
@@ -121,16 +121,15 @@ export function LoginForm() {
 
       <section className="relative hidden overflow-hidden bg-graphite p-12 text-white lg:block">
         <div className="absolute inset-y-16 right-0 w-28 rounded-l-full bg-lime/90" />
-        <div className="absolute left-16 top-20 h-3 w-28 rounded-full bg-lime" />
         <div className="relative z-10 flex h-full flex-col justify-between">
           <Logo dark />
           <div className="max-w-xl">
-            <p className="text-sm font-black uppercase tracking-[0.22em] text-lime">operacao conectada</p>
+            <p className="text-sm font-black uppercase tracking-[0.22em] text-lime">operação conectada</p>
             <h2 className="mt-6 text-6xl font-black leading-[0.95] tracking-normal text-white">
-              Reposicao sem ruído entre salao, bar e estoque.
+              Reposição sem ruído entre salão, bar e estoque.
             </h2>
             <p className="mt-6 text-lg leading-8 text-ice/75">
-              Cadastre produtos, acompanhe solicitacoes e mantenha o mesmo Supabase alimentando o app Android BAR.
+              Cadastre produtos, acompanhe solicitações e mantenha o mesmo Supabase alimentando o app Android BAR.
             </p>
             <div className="mt-10 flex items-center">
               {["MC", "BR", "OP", "AD"].map((avatar, index) => (
@@ -147,7 +146,7 @@ export function LoginForm() {
           </div>
           <div className="grid grid-cols-3 gap-3 text-sm text-ice/70">
             <div className="border-t border-white/15 pt-4">Produtos ativos</div>
-            <div className="border-t border-white/15 pt-4">Status rastreavel</div>
+            <div className="border-t border-white/15 pt-4">Status rastreável</div>
             <div className="border-t border-white/15 pt-4">Mobile sync</div>
           </div>
         </div>

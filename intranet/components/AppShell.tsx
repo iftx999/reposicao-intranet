@@ -13,8 +13,8 @@ type NavItem = { href: string; label: string; icon?: LucideIcon };
 const navItems: NavItem[] = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/produtos", label: "Pesquisa/Produtos", icon: PackageSearch },
-  { href: "/solicitacoes", label: "Solicitacoes", icon: ClipboardList },
-  { href: "/usuarios", label: "Usuarios", icon: Users },
+  { href: "/solicitacoes", label: "Solicitações", icon: ClipboardList },
+  { href: "/usuarios", label: "Usuários", icon: Users },
   { href: "/administrativo", label: "Administrativo", icon: Settings }
 ];
 

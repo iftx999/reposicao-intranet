@@ -71,7 +71,7 @@ export function UserModal({
       <form className="w-full max-w-2xl rounded-lg bg-white p-6 shadow-panel" onSubmit={submit}>
         <div className="flex items-center justify-between border-b border-charcoal/10 pb-4">
           <div>
-            <h2 className="text-xl font-black text-graphite">{profile ? "Editar usuario" : "Adicionar usuario"}</h2>
+            <h2 className="text-xl font-black text-graphite">{profile ? "Editar usuário" : "Adicionar usuário"}</h2>
             <p className="text-sm text-muted">
               {profile ? "Atualize os dados operacionais do perfil." : "Cria auth.users e o profile vinculado."}
             </p>
@@ -106,7 +106,7 @@ export function UserModal({
             />
           </Field>
           {!profile ? (
-            <Field label="Senha temporaria">
+            <Field label="Senha temporária">
               <input
                 className="h-11 w-full rounded-lg border border-charcoal/10 px-3 outline-none focus:border-soda"
                 minLength={6}

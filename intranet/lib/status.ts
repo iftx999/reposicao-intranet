@@ -2,7 +2,7 @@ import type { RequestStatus } from "@/lib/types";
 
 export const statusLabels: Record<RequestStatus, string> = {
   pending: "Pendente",
-  in_separation: "Em separacao",
+  in_separation: "Em separação",
   replenished: "Reposto",
   cancelled: "Cancelado"
 };

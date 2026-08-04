@@ -5,7 +5,7 @@ export function Logo({ dark = false }: { dark?: boolean }) {
         BAR
       </div>
       <div>
-        <p className={`text-sm font-black leading-tight ${dark ? "text-white" : "text-graphite"}`}>Reposicao</p>
+        <p className={`text-sm font-black leading-tight ${dark ? "text-white" : "text-graphite"}`}>Reposição</p>
         <p className={`text-xs leading-tight ${dark ? "text-ice/70" : "text-muted"}`}>Intranet ADM</p>
       </div>
     </div>

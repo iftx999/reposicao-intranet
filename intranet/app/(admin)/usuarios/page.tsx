@@ -72,7 +72,7 @@ export default function UsuariosPage() {
     const payload = (await response.json()) as { error?: string };
 
     if (!response.ok) {
-      setError(payload.error || "Erro ao criar usuario.");
+      setError(payload.error || "Erro ao criar usuário.");
       return;
     }
 
@@ -115,7 +115,7 @@ export default function UsuariosPage() {
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
           <p className="text-xs font-black uppercase tracking-[0.18em] text-muted">Administrativo</p>
-          <h1 className="mt-2 text-3xl font-black text-graphite">Cadastro de Usuarios</h1>
+          <h1 className="mt-2 text-3xl font-black text-graphite">Cadastro de Usuários</h1>
         </div>
         <button
           className="focus-ring inline-flex items-center gap-2 rounded-lg bg-graphite px-4 py-3 text-sm font-black text-white"
@@ -190,7 +190,7 @@ export default function UsuariosPage() {
         <table className="w-full min-w-[920px] border-collapse text-left text-sm">
           <thead className="bg-charcoal text-white">
             <tr>
-              {["Nome", "Email", "Role", "Setor", "Ativo", "Criado em", "Acoes"].map((heading) => (
+              {["Nome", "Email", "Role", "Setor", "Ativo", "Criado em", "Ações"].map((heading) => (
                 <th className="px-4 py-4 font-black" key={heading}>
                   {heading}
                 </th>
@@ -200,11 +200,11 @@ export default function UsuariosPage() {
           <tbody>
             {loading ? (
               <tr>
-                <td className="px-4 py-8 text-muted" colSpan={7}>Carregando usuarios...</td>
+                <td className="px-4 py-8 text-muted" colSpan={7}>Carregando usuários...</td>
               </tr>
             ) : filtered.length === 0 ? (
               <tr>
-                <td className="px-4 py-8 text-muted" colSpan={7}>Nenhum usuario encontrado.</td>
+                <td className="px-4 py-8 text-muted" colSpan={7}>Nenhum usuário encontrado.</td>
               </tr>
             ) : (
               filtered.map((profile) => (
