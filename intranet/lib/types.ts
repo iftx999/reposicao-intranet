@@ -44,3 +44,26 @@ export type RequestStatusEvent = {
 };
 
 export type ProductFormValues = Omit<Product, "id">;
+
+export type UserRole = "admin" | "gestor" | "operador";
+
+export type Profile = {
+  id: string;
+  full_name: string;
+  email: string;
+  role: UserRole;
+  sector_id: string | null;
+  active: boolean;
+  created_at: string;
+};
+
+export type ProfileCreateValues = {
+  full_name: string;
+  email: string;
+  password: string;
+  role: UserRole;
+  sector_id: string | null;
+  active: boolean;
+};
+
+export type ProfileUpdateValues = Pick<Profile, "full_name" | "role" | "sector_id" | "active">;
