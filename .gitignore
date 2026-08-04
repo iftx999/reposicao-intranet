@@ -1,0 +1,23 @@
+# Android / Gradle
+.gradle/
+.idea/
+.kotlin/
+build/
+*.iml
+.cxx/
+local.properties
+*.hprof
+captures/
+.externalNativeBuild/
+
+# Node / Next.js (intranet)
+intranet/node_modules/
+intranet/.next/
+intranet/out/
+intranet/.env*.local
+intranet/npm-debug.log*
+intranet/*.tsbuildinfo
+
+# OS
+.DS_Store
+Thumbs.db
