@@ -3,6 +3,7 @@ export type Priority = "baixa" | "normal" | "alta" | "urgente";
 
 export type Product = {
   id: string;
+  company_id: string;
   sector_id: string;
   name: string;
   category: string;
@@ -13,6 +14,7 @@ export type Product = {
 
 export type ReplenishmentRequest = {
   id: string;
+  company_id: string;
   restaurant_unit_id: string;
   sector_id: string;
   created_by: string;
@@ -43,7 +45,7 @@ export type RequestStatusEvent = {
   created_at: string;
 };
 
-export type ProductFormValues = Omit<Product, "id">;
+export type ProductFormValues = Omit<Product, "id" | "company_id">;
 
 export type UserRole = "admin" | "gestor" | "operador";
 
@@ -55,6 +57,8 @@ export type Profile = {
   sector_id: string | null;
   active: boolean;
   created_at: string;
+  company_id: string | null;
+  is_super_admin: boolean;
 };
 
 export type ProfileCreateValues = {
@@ -67,3 +71,17 @@ export type ProfileCreateValues = {
 };
 
 export type ProfileUpdateValues = Pick<Profile, "full_name" | "role" | "sector_id" | "active">;
+
+export type Company = {
+  id: string;
+  name: string;
+  active: boolean;
+  created_at: string;
+};
+
+export type CompanyCreateValues = {
+  company_name: string;
+  admin_full_name: string;
+  admin_email: string;
+  admin_password: string;
+};
