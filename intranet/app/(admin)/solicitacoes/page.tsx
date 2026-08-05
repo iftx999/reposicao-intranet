@@ -3,6 +3,10 @@
 import { Ban, CheckCircle2, ChevronsRight } from "lucide-react";
 import { useEffect, useState } from "react";
 import { StatusBadge } from "@/components/StatusBadge";
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { nextStatuses, statusLabels } from "@/lib/status";
 import { supabase } from "@/lib/supabase";
 import type { ReplenishmentRequest, ReplenishmentRequestItem, RequestStatus, RequestStatusEvent } from "@/lib/types";
@@ -95,56 +99,57 @@ export default function SolicitacoesPage() {
             <p className="text-xs font-black uppercase tracking-[0.18em] text-muted">Reposição</p>
             <h1 className="mt-2 text-3xl font-black text-graphite">Solicitações de Reposição</h1>
           </div>
-          <label className="block min-w-64">
-            <span className="text-sm font-bold text-graphite">Status</span>
-            <select
-              className="mt-2 h-11 w-full rounded-lg border border-charcoal/10 bg-white px-3 outline-none focus:border-soda"
-              onChange={(event) => setStatus(event.target.value as RequestStatus | "all")}
-              value={status}
-            >
-              <option value="all">Todos</option>
-              <option value="pending">Pendente</option>
-              <option value="in_separation">Em separação</option>
-              <option value="replenished">Reposto</option>
-              <option value="cancelled">Cancelado</option>
-            </select>
-          </label>
+          <div className="min-w-64">
+            <Label className="text-sm font-bold text-graphite">Status</Label>
+            <Select onValueChange={(value) => setStatus(value as RequestStatus | "all")} value={status}>
+              <SelectTrigger className="mt-2 w-full bg-white">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todos</SelectItem>
+                <SelectItem value="pending">Pendente</SelectItem>
+                <SelectItem value="in_separation">Em separação</SelectItem>
+                <SelectItem value="replenished">Reposto</SelectItem>
+                <SelectItem value="cancelled">Cancelado</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
         </div>
 
         {error ? <p className="mt-4 rounded-lg bg-coral/10 p-3 text-sm font-semibold text-coral">{error}</p> : null}
 
         <section className="mt-6 overflow-hidden rounded-lg border border-charcoal/10 bg-white shadow-sm">
-          <table className="w-full min-w-[760px] border-collapse text-left text-sm">
-            <thead className="bg-charcoal text-white">
-              <tr>
+          <Table>
+            <TableHeader>
+              <TableRow className="bg-charcoal hover:bg-charcoal">
                 {["ID", "Setor", "Criado por", "Prioridade", "Status", "Data"].map((heading) => (
-                  <th className="px-4 py-4 font-black" key={heading}>{heading}</th>
+                  <TableHead className="font-black text-white" key={heading}>{heading}</TableHead>
                 ))}
-              </tr>
-            </thead>
-            <tbody>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
               {loading ? (
-                <tr><td className="px-4 py-8 text-muted" colSpan={6}>Carregando solicitações...</td></tr>
+                <TableRow><TableCell className="text-muted" colSpan={6}>Carregando solicitações...</TableCell></TableRow>
               ) : requests.length === 0 ? (
-                <tr><td className="px-4 py-8 text-muted" colSpan={6}>Nenhuma solicitação encontrada.</td></tr>
+                <TableRow><TableCell className="text-muted" colSpan={6}>Nenhuma solicitação encontrada.</TableCell></TableRow>
               ) : (
                 requests.map((request) => (
-                  <tr
-                    className="cursor-pointer border-t border-charcoal/10 hover:bg-ice"
+                  <TableRow
+                    className="cursor-pointer hover:bg-ice"
                     key={request.id}
                     onClick={() => void openRequest(request)}
                   >
-                    <td className="px-4 py-4 font-mono text-xs text-graphite">{request.id.slice(0, 8)}</td>
-                    <td className="px-4 py-4 text-muted">{request.sector_id}</td>
-                    <td className="px-4 py-4 text-muted">{request.created_by}</td>
-                    <td className="px-4 py-4 font-bold text-graphite">{request.priority}</td>
-                    <td className="px-4 py-4"><StatusBadge status={request.status} /></td>
-                    <td className="px-4 py-4 text-muted">{new Date(request.created_at).toLocaleString("pt-BR")}</td>
-                  </tr>
+                    <TableCell className="font-mono text-xs text-graphite">{request.id.slice(0, 8)}</TableCell>
+                    <TableCell className="text-muted">{request.sector_id}</TableCell>
+                    <TableCell className="text-muted">{request.created_by}</TableCell>
+                    <TableCell className="font-bold text-graphite">{request.priority}</TableCell>
+                    <TableCell><StatusBadge status={request.status} /></TableCell>
+                    <TableCell className="text-muted">{new Date(request.created_at).toLocaleString("pt-BR")}</TableCell>
+                  </TableRow>
                 ))
               )}
-            </tbody>
-          </table>
+            </TableBody>
+          </Table>
         </section>
       </section>
 
@@ -202,17 +207,15 @@ export default function SolicitacoesPage() {
 
             <div className="mt-6 flex flex-wrap gap-3">
               {nextStatuses(selected.status).map((nextStatus) => (
-                <button
-                  className={`focus-ring inline-flex items-center gap-2 rounded-lg px-4 py-3 text-sm font-black ${
-                    nextStatus === "cancelled" ? "bg-coral text-white" : "bg-graphite text-white"
-                  }`}
+                <Button
                   key={nextStatus}
                   onClick={() => void transitionRequest(nextStatus)}
                   type="button"
+                  variant={nextStatus === "cancelled" ? "destructive" : "default"}
                 >
                   {nextStatus === "cancelled" ? <Ban className="h-4 w-4" /> : nextStatus === "replenished" ? <CheckCircle2 className="h-4 w-4" /> : <ChevronsRight className="h-4 w-4" />}
                   {nextStatus === "cancelled" ? "Cancelar" : `Avançar para ${statusLabels[nextStatus]}`}
-                </button>
+                </Button>
               ))}
             </div>
           </>
