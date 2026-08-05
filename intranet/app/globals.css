@@ -1,9 +1,58 @@
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  color-scheme: light;
+@layer base {
+  :root {
+    --background: 210 20% 98%;        /* ice #F7F8FA */
+    --foreground: 220 14% 9%;         /* graphite #16191D */
+    --card: 0 0% 100%;
+    --card-foreground: 220 14% 9%;    /* graphite */
+    --popover: 0 0% 100%;
+    --popover-foreground: 220 14% 9%; /* graphite */
+    --primary: 220 14% 9%;            /* graphite */
+    --primary-foreground: 0 0% 100%;
+    --secondary: 210 20% 98%;         /* ice */
+    --secondary-foreground: 220 14% 9%; /* graphite */
+    --muted: 210 20% 98%;             /* ice */
+    --muted-foreground: 216 6% 44%;   /* muted #6B727A */
+    --accent: 207 93% 62%;            /* soda #48A9F8 */
+    --accent-foreground: 0 0% 100%;
+    --destructive: 4 100% 65%;        /* coral #FF5A4F */
+    --destructive-foreground: 0 0% 100%;
+    --success: 78 71% 66%;            /* lime #B6E85F */
+    --success-foreground: 220 14% 9%; /* graphite */
+    --warning: 38 90% 63%;            /* amber #F6B44B */
+    --warning-foreground: 220 14% 9%; /* graphite */
+    --border: 220 15% 11% / 0.1;      /* charcoal/10, corresponde ao border-charcoal/10 ja usado */
+    --input: 220 15% 11% / 0.1;
+    --ring: 207 93% 62%;              /* soda, corresponde ao focus:border-soda ja usado */
+    --radius: 0.5rem;                 /* corresponde ao rounded-lg ja usado */
+    --chart-1: 220 14% 9%;
+    --chart-2: 216 6% 44%;
+    --chart-3: 207 93% 62%;
+    --chart-4: 78 71% 66%;
+    --chart-5: 38 90% 63%;
+    --sidebar: 210 20% 98%;
+    --sidebar-foreground: 220 14% 9%;
+    --sidebar-primary: 220 14% 9%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 207 93% 62%;
+    --sidebar-accent-foreground: 0 0% 100%;
+    --sidebar-border: 220 15% 11% / 0.1;
+    --sidebar-ring: 207 93% 62%;
+  }
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+  html {
+    @apply font-sans;
+  }
 }
 
 * {
@@ -19,7 +68,6 @@ body {
   margin: 0;
   background: #f7f8fa;
   color: #16191d;
-  font-family: Arial, Helvetica, sans-serif;
 }
 
 button,
