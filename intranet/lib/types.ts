@@ -85,3 +85,18 @@ export type CompanyCreateValues = {
   admin_email: string;
   admin_password: string;
 };
+
+export type Sector = {
+  id: string;
+  company_id: string;
+  name: string;
+  active: boolean;
+  created_at: string;
+};
+
+export type SectorCreateValues = {
+  name: string;
+  active: boolean;
+};
+
+export type SectorUpdateValues = Pick<Sector, "name" | "active">;
