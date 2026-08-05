@@ -10,6 +10,8 @@ export type Product = {
   unit: string;
   active: boolean;
   favorite: boolean;
+  quantity: number;
+  min_quantity: number;
 };
 
 export type ReplenishmentRequest = {
