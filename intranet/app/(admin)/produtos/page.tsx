@@ -177,16 +177,16 @@ export default function ProdutosPage() {
         <Table>
           <TableHeader>
             <TableRow className="bg-charcoal hover:bg-charcoal">
-              {["Nome", "Categoria", "Setor", "Unidade", "Ativo", "Favorito", "Ações"].map((heading) => (
+              {["Nome", "Categoria", "Setor", "Unidade", "Estoque", "Ativo", "Favorito", "Ações"].map((heading) => (
                 <TableHead className="font-black text-white" key={heading}>{heading}</TableHead>
               ))}
             </TableRow>
           </TableHeader>
           <TableBody>
             {loading ? (
-              <TableRow><TableCell className="text-muted" colSpan={7}>Carregando produtos...</TableCell></TableRow>
+              <TableRow><TableCell className="text-muted" colSpan={8}>Carregando produtos...</TableCell></TableRow>
             ) : filtered.length === 0 ? (
-              <TableRow><TableCell className="text-muted" colSpan={7}>Nenhum produto encontrado.</TableCell></TableRow>
+              <TableRow><TableCell className="text-muted" colSpan={8}>Nenhum produto encontrado.</TableCell></TableRow>
             ) : (
               filtered.map((product) => (
                 <TableRow className="hover:bg-ice" key={product.id}>
@@ -194,6 +194,11 @@ export default function ProdutosPage() {
                   <TableCell className="text-muted">{product.category}</TableCell>
                   <TableCell className="text-muted">{sectorsById.get(product.sector_id) || "-"}</TableCell>
                   <TableCell className="text-muted">{product.unit}</TableCell>
+                  <TableCell>
+                    <Badge variant={product.quantity < product.min_quantity ? "destructive" : "secondary"}>
+                      {product.quantity}
+                    </Badge>
+                  </TableCell>
                   <TableCell>
                     <Badge variant={product.active ? "success" : "secondary"}>{product.active ? "Sim" : "Não"}</Badge>
                   </TableCell>

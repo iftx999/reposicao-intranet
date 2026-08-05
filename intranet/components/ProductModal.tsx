@@ -23,7 +23,9 @@ const emptyValues: ProductFormValues = {
   sector_id: "",
   unit: "",
   active: true,
-  favorite: false
+  favorite: false,
+  quantity: 0,
+  min_quantity: 0
 };
 
 export function ProductModal({
@@ -117,6 +119,28 @@ export function ProductModal({
                 onChange={(event) => setValues((current) => ({ ...current, unit: event.target.value }))}
                 required
                 value={values.unit}
+              />
+            </div>
+            <div>
+              <Label>Quantidade</Label>
+              <Input
+                className="mt-2"
+                min={0}
+                onChange={(event) => setValues((current) => ({ ...current, quantity: Number(event.target.value) }))}
+                required
+                type="number"
+                value={values.quantity}
+              />
+            </div>
+            <div>
+              <Label>Quantidade mínima</Label>
+              <Input
+                className="mt-2"
+                min={0}
+                onChange={(event) => setValues((current) => ({ ...current, min_quantity: Number(event.target.value) }))}
+                required
+                type="number"
+                value={values.min_quantity}
               />
             </div>
           </div>
