@@ -75,7 +75,9 @@ fun LoginScreen(
     password: String,
     onUser: (String) -> Unit,
     onPassword: (String) -> Unit,
-    onLogin: () -> Unit
+    onLogin: () -> Unit,
+    error: String = "",
+    loading: Boolean = false
 ) {
     Column(
         modifier = Modifier
@@ -161,8 +163,12 @@ fun LoginScreen(
                         visualTransformation = PasswordVisualTransformation(),
                         colors = inputColors()
                     )
+                    if (error.isNotBlank()) {
+                        Gap(10)
+                        Text(error, color = Coral, style = MaterialTheme.typography.bodyMedium)
+                    }
                     Gap(18)
-                    PrimaryButton("Entrar no BAR", Lime, Graphite, onLogin)
+                    PrimaryButton(if (loading) "Entrando..." else "Entrar no BAR", Lime, Graphite, onLogin)
                 }
             }
         }

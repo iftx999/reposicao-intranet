@@ -39,6 +39,7 @@ import com.example.barreplenishment.core.data.RequestWithDetails
 import com.example.barreplenishment.core.database.AppDatabase
 import com.example.barreplenishment.core.database.ProductEntity
 import com.example.barreplenishment.core.network.SupabaseClient
+import com.example.barreplenishment.core.network.AuthResult
 import com.example.barreplenishment.core.sync.SyncManager
 import com.example.barreplenishment.core.ui.BarTheme
 import com.example.barreplenishment.core.ui.BottomTabs
@@ -74,12 +75,23 @@ fun BarApp() {
     val prefs = remember { context.getSharedPreferences("session", Context.MODE_PRIVATE) }
     val db = remember { Room.databaseBuilder(context, AppDatabase::class.java, "bar-replenishment.db").build() }
     val repository = remember { BarRepository(db) }
-    val syncManager = remember { SyncManager(repository, SupabaseClient()) }
+    val supabaseClient = remember {
+        SupabaseClient().apply {
+            val savedAccess = prefs.getString("access_token", null)
+            val savedRefresh = prefs.getString("refresh_token", null)
+            if (savedAccess != null && savedRefresh != null) {
+                restoreSession(savedAccess, savedRefresh)
+            }
+        }
+    }
+    val syncManager = remember { SyncManager(repository, supabaseClient) }
     val scope = rememberCoroutineScope()
 
     var loggedIn by remember { mutableStateOf(prefs.getBoolean("logged_in", false)) }
     var user by remember { mutableStateOf(prefs.getString("user_name", "") ?: "") }
     var password by remember { mutableStateOf("") }
+    var authError by remember { mutableStateOf("") }
+    var authLoading by remember { mutableStateOf(false) }
     var tab by remember { mutableIntStateOf(0) }
     var reviewing by remember { mutableStateOf(false) }
     var selectedRequestId by remember { mutableStateOf<String?>(null) }
@@ -126,11 +138,34 @@ fun BarApp() {
                 password = password,
                 onUser = { user = it },
                 onPassword = { password = it },
+                error = authError,
+                loading = authLoading,
                 onLogin = {
-                    if (user.isBlank() || password.isBlank()) toast(context, "Preencha usuario e senha.")
-                    else {
-                        prefs.edit().putBoolean("logged_in", true).putString("user_name", user).apply()
-                        loggedIn = true
+                    if (user.isBlank() || password.isBlank()) {
+                        toast(context, "Preencha usuario e senha.")
+                    } else {
+                        authLoading = true
+                        authError = ""
+                        scope.launch {
+                            val result = withContext(Dispatchers.IO) { supabaseClient.signIn(user, password) }
+                            authLoading = false
+                            when (result) {
+                                is AuthResult.Success -> {
+                                    prefs.edit()
+                                        .putBoolean("logged_in", true)
+                                        .putString("user_name", result.userEmail)
+                                        .putString("access_token", result.accessToken)
+                                        .putString("refresh_token", result.refreshToken)
+                                        .apply()
+                                    user = result.userEmail
+                                    loggedIn = true
+                                }
+                                is AuthResult.Failure -> {
+                                    authError = result.message
+                                    toast(context, result.message)
+                                }
+                            }
+                        }
                     }
                 }
             )
