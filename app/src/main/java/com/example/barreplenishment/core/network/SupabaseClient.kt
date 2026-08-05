@@ -145,6 +145,8 @@ class SupabaseClient {
         }
     }
 
+    private fun isoTimestamp(millis: Long): String = java.time.Instant.ofEpochMilli(millis).toString()
+
     fun upsertRequest(details: RequestWithDetails): Boolean {
         if (!enabled) return false
         val request = details.request
@@ -156,9 +158,9 @@ class SupabaseClient {
             .put("priority", request.priority)
             .put("status", request.status)
             .put("notes", request.notes)
-            .put("created_at", request.createdAt)
-            .put("updated_at", request.updatedAt)
-            .put("synced_at", System.currentTimeMillis())
+            .put("created_at", isoTimestamp(request.createdAt))
+            .put("updated_at", isoTimestamp(request.updatedAt))
+            .put("synced_at", isoTimestamp(System.currentTimeMillis()))
         if (!post("replenishment_requests", JSONArray().put(body))) return false
 
         val items = JSONArray()
@@ -184,7 +186,7 @@ class SupabaseClient {
                     .put("status", event.status)
                     .put("message", event.message)
                     .put("user_id", event.userId)
-                    .put("created_at", event.createdAt)
+                    .put("created_at", isoTimestamp(event.createdAt))
             )
         }
         return events.length() == 0 || post("request_status_events", events)
