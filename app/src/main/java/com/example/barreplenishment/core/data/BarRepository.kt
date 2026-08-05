@@ -50,7 +50,6 @@ class BarRepository(private val db: AppDatabase) {
         require(lines.isNotEmpty()) { "Uma solicitação precisa ter pelo menos um item." }
         val now = System.currentTimeMillis()
         val id = UUID.randomUUID().toString()
-        val syncState = if (online) SyncState.Synced else SyncState.WaitingUpload
         val request = ReplenishmentRequestEntity(
             id = id,
             restaurantUnitId = "main",
@@ -61,8 +60,8 @@ class BarRepository(private val db: AppDatabase) {
             notes = notes,
             createdAt = now,
             updatedAt = now,
-            syncedAt = if (online) now else null,
-            syncState = syncState
+            syncedAt = null,
+            syncState = SyncState.WaitingUpload
         )
         val items = lines.map { line ->
             require(line.quantity > 0) { "Quantidade deve ser maior que zero." }
@@ -96,8 +95,8 @@ class BarRepository(private val db: AppDatabase) {
                 id = id,
                 status = status,
                 updatedAt = now,
-                syncState = if (online) SyncState.Synced else SyncState.WaitingUpload,
-                syncedAt = if (online) now else null
+                syncState = SyncState.WaitingUpload,
+                syncedAt = null
             )
             requestDao.upsertEvent(event(id, status, message, user.ifBlank { "responsável_bar" }, now))
         }
