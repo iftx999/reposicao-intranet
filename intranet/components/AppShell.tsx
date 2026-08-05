@@ -1,6 +1,6 @@
 "use client";
 
-import { Expand, LayoutDashboard, LogOut, PackageSearch, Settings, ClipboardList, LucideIcon, Users } from "lucide-react";
+import { Building2, Expand, LayoutDashboard, LogOut, PackageSearch, Settings, ClipboardList, LucideIcon, Users } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect } from "react";
@@ -19,7 +19,7 @@ const navItems: NavItem[] = [
 ];
 
 export function AppShell({ children }: { children: React.ReactNode }) {
-  const { session, loading } = useAuth();
+  const { session, profile, loading } = useAuth();
   const pathname = usePathname();
   const router = useRouter();
 
@@ -45,7 +45,10 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-6">
           <Logo />
           <nav className="hidden items-center gap-1 lg:flex">
-            {navItems.map((item) => {
+            {(profile?.is_super_admin
+              ? [...navItems, { href: "/empresas", label: "Empresas", icon: Building2 }]
+              : navItems
+            ).map((item) => {
               const active = pathname === item.href;
               const Icon = item.icon;
 

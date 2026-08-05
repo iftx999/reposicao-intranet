@@ -1,6 +1,6 @@
 import { createClient } from "@supabase/supabase-js";
 import { NextRequest, NextResponse } from "next/server";
-import type { ProfileCreateValues } from "@/lib/types";
+import type { CompanyCreateValues } from "@/lib/types";
 
 function getServerSupabase() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -43,59 +43,65 @@ export async function POST(request: NextRequest) {
 
   const { data: requesterProfile, error: profileError } = await supabase
     .from("profiles")
-    .select("role, active, company_id")
+    .select("is_super_admin")
     .eq("id", user.id)
     .single();
 
-  if (profileError || requesterProfile?.role !== "admin" || requesterProfile.active !== true) {
-    return NextResponse.json({ error: "Apenas administradores podem criar usuarios." }, { status: 403 });
+  if (profileError || requesterProfile?.is_super_admin !== true) {
+    return NextResponse.json({ error: "Apenas o super admin pode criar empresas." }, { status: 403 });
   }
 
-  const body = (await request.json()) as Partial<ProfileCreateValues>;
-  const fullName = body.full_name?.trim();
-  const email = body.email?.trim().toLowerCase();
-  const password = body.password;
-  const role = body.role || "operador";
-  const sectorId = body.sector_id?.trim() || null;
-  const active = body.active ?? true;
+  const body = (await request.json()) as Partial<CompanyCreateValues>;
+  const companyName = body.company_name?.trim();
+  const adminFullName = body.admin_full_name?.trim();
+  const adminEmail = body.admin_email?.trim().toLowerCase();
+  const adminPassword = body.admin_password;
 
-  if (!fullName || !email || !password) {
-    return NextResponse.json({ error: "Nome, email e senha temporaria sao obrigatorios." }, { status: 400 });
+  if (!companyName || !adminFullName || !adminEmail || !adminPassword) {
+    return NextResponse.json(
+      { error: "Nome da empresa, nome do admin, email e senha temporaria sao obrigatorios." },
+      { status: 400 }
+    );
   }
 
-  if (!["admin", "gestor", "operador"].includes(role)) {
-    return NextResponse.json({ error: "Role invalida." }, { status: 400 });
+  const { data: company, error: companyError } = await supabase
+    .from("companies")
+    .insert({ name: companyName })
+    .select("*")
+    .single();
+
+  if (companyError || !company) {
+    return NextResponse.json({ error: companyError?.message || "Erro ao criar empresa." }, { status: 400 });
   }
 
   const { data: authData, error: createError } = await supabase.auth.admin.createUser({
-    email,
-    password,
+    email: adminEmail,
+    password: adminPassword,
     email_confirm: true,
     user_metadata: {
-      full_name: fullName,
-      role,
-      sector_id: sectorId,
-      company_id: requesterProfile.company_id,
+      full_name: adminFullName,
+      role: "admin",
+      company_id: company.id,
       is_super_admin: false
     }
   });
 
   if (createError || !authData.user) {
-    return NextResponse.json({ error: createError?.message || "Erro ao criar usuario." }, { status: 400 });
+    return NextResponse.json({ error: createError?.message || "Erro ao criar admin da empresa." }, { status: 400 });
   }
 
   const profile = {
     id: authData.user.id,
-    full_name: fullName,
-    email,
-    role,
-    sector_id: sectorId,
-    active,
-    company_id: requesterProfile.company_id,
+    full_name: adminFullName,
+    email: adminEmail,
+    role: "admin" as const,
+    sector_id: null,
+    active: true,
+    company_id: company.id,
     is_super_admin: false
   };
 
-  const { data, error: profileInsertError } = await supabase
+  const { error: profileInsertError } = await supabase
     .from("profiles")
     .upsert(profile, { onConflict: "id" })
     .select("*")
@@ -105,5 +111,5 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: profileInsertError.message }, { status: 400 });
   }
 
-  return NextResponse.json({ profile: data }, { status: 201 });
+  return NextResponse.json({ company }, { status: 201 });
 }
