@@ -2,6 +2,7 @@ package com.example.barreplenishment.core.network
 
 import com.example.barreplenishment.BuildConfig
 import com.example.barreplenishment.core.data.RequestWithDetails
+import com.example.barreplenishment.core.database.ProductEntity
 import org.json.JSONArray
 import org.json.JSONObject
 import java.io.BufferedReader
@@ -34,6 +35,40 @@ class SupabaseClient {
     fun restoreSession(access: String, refresh: String) {
         accessToken = access
         refreshToken = refresh
+    }
+
+    fun fetchProducts(): List<ProductEntity>? {
+        if (!enabled) return null
+        val url = URL("$baseUrl/rest/v1/products?select=id,sector_id,name,category,unit,active,favorite&active=eq.true")
+        val connection = (url.openConnection() as HttpURLConnection).apply {
+            requestMethod = "GET"
+            connectTimeout = 8000
+            readTimeout = 8000
+            setRequestProperty("apikey", anonKey)
+            setRequestProperty("Authorization", "Bearer ${accessToken ?: anonKey}")
+        }
+        return try {
+            val code = connection.responseCode
+            if (code !in 200..299) return null
+            val text = BufferedReader(InputStreamReader(connection.inputStream)).use { it.readText() }
+            val array = JSONArray(text)
+            (0 until array.length()).map { i ->
+                val obj = array.getJSONObject(i)
+                ProductEntity(
+                    id = obj.getString("id"),
+                    sectorId = obj.getString("sector_id"),
+                    name = obj.getString("name"),
+                    category = obj.getString("category"),
+                    unit = obj.getString("unit"),
+                    active = obj.getBoolean("active"),
+                    favorite = obj.getBoolean("favorite")
+                )
+            }
+        } catch (_: Exception) {
+            null
+        } finally {
+            connection.disconnect()
+        }
     }
 
     fun signIn(email: String, password: String): AuthResult {

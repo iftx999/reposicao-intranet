@@ -17,6 +17,14 @@ class BarRepository(private val db: AppDatabase) {
         productDao.upsertAll(seedProducts())
     }
 
+    suspend fun replaceProducts(products: List<ProductEntity>) {
+        if (products.isEmpty()) return
+        db.withTransaction {
+            productDao.deleteAll()
+            productDao.upsertAll(products)
+        }
+    }
+
     suspend fun products(category: String = "Todos", query: String = ""): List<ProductEntity> {
         val base = if (category == "Todos") productDao.activeProducts() else productDao.productsByCategory(category)
         return if (query.isBlank()) base else base.filter { it.name.contains(query, ignoreCase = true) }
@@ -41,7 +49,7 @@ class BarRepository(private val db: AppDatabase) {
     suspend fun createRequest(createdBy: String, priority: String, notes: String, lines: List<CartLine>, online: Boolean): String {
         require(lines.isNotEmpty()) { "Uma solicitação precisa ter pelo menos um item." }
         val now = System.currentTimeMillis()
-        val id = "BAR-" + now.toString().takeLast(7)
+        val id = UUID.randomUUID().toString()
         val syncState = if (online) SyncState.Synced else SyncState.WaitingUpload
         val request = ReplenishmentRequestEntity(
             id = id,
