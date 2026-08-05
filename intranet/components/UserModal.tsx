@@ -1,7 +1,19 @@
 "use client";
 
-import { X } from "lucide-react";
 import { FormEvent, useEffect, useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { roleLabels } from "@/lib/profile";
 import type { Profile, ProfileCreateValues, ProfileUpdateValues, UserRole } from "@/lib/types";
 
@@ -67,116 +79,100 @@ export function UserModal({
   }
 
   return (
-    <div className="fixed inset-0 z-50 grid place-items-center bg-graphite/45 px-4">
-      <form className="w-full max-w-2xl rounded-lg bg-white p-6 shadow-panel" onSubmit={submit}>
-        <div className="flex items-center justify-between border-b border-charcoal/10 pb-4">
-          <div>
-            <h2 className="text-xl font-black text-graphite">{profile ? "Editar usuário" : "Adicionar usuário"}</h2>
-            <p className="text-sm text-muted">
+    <Dialog
+      onOpenChange={(open) => {
+        if (!open) onClose();
+      }}
+      open
+    >
+      <DialogContent className="max-w-2xl">
+        <form onSubmit={submit}>
+          <DialogHeader>
+            <DialogTitle>{profile ? "Editar usuário" : "Adicionar usuário"}</DialogTitle>
+            <DialogDescription>
               {profile ? "Atualize os dados operacionais do perfil." : "Cria auth.users e o profile vinculado."}
-            </p>
-          </div>
-          <button
-            aria-label="Fechar"
-            className="focus-ring grid h-10 w-10 place-items-center rounded-lg text-muted hover:bg-charcoal/5"
-            onClick={onClose}
-            type="button"
-          >
-            <X className="h-5 w-5" />
-          </button>
-        </div>
+            </DialogDescription>
+          </DialogHeader>
 
-        <div className="mt-6 grid gap-4 sm:grid-cols-2">
-          <Field label="Nome completo">
-            <input
-              className="h-11 w-full rounded-lg border border-charcoal/10 px-3 outline-none focus:border-soda"
-              onChange={(event) => setValues((current) => ({ ...current, full_name: event.target.value }))}
-              required
-              value={values.full_name}
-            />
-          </Field>
-          <Field label="Email">
-            <input
-              className="h-11 w-full rounded-lg border border-charcoal/10 px-3 outline-none focus:border-soda disabled:bg-ice disabled:text-muted"
-              disabled={Boolean(profile)}
-              onChange={(event) => setValues((current) => ({ ...current, email: event.target.value }))}
-              required
-              type="email"
-              value={values.email}
-            />
-          </Field>
-          {!profile ? (
-            <Field label="Senha temporária">
-              <input
-                className="h-11 w-full rounded-lg border border-charcoal/10 px-3 outline-none focus:border-soda"
-                minLength={6}
-                onChange={(event) => setValues((current) => ({ ...current, password: event.target.value }))}
+          <div className="mt-6 grid gap-4 sm:grid-cols-2">
+            <div>
+              <Label>Nome completo</Label>
+              <Input
+                className="mt-2"
+                onChange={(event) => setValues((current) => ({ ...current, full_name: event.target.value }))}
                 required
-                type="password"
-                value={values.password}
+                value={values.full_name}
               />
-            </Field>
-          ) : null}
-          <Field label="Role">
-            <select
-              className="h-11 w-full rounded-lg border border-charcoal/10 px-3 outline-none focus:border-soda"
-              onChange={(event) => setValues((current) => ({ ...current, role: event.target.value as UserRole }))}
-              value={values.role}
-            >
-              {roleOptions.map((role) => (
-                <option key={role} value={role}>
-                  {roleLabels[role]}
-                </option>
-              ))}
-            </select>
-          </Field>
-          <Field label="Setor">
-            <input
-              className="h-11 w-full rounded-lg border border-charcoal/10 px-3 outline-none focus:border-soda"
-              onChange={(event) => setValues((current) => ({ ...current, sector_id: event.target.value }))}
-              placeholder="BAR"
-              value={values.sector_id || ""}
-            />
-          </Field>
-        </div>
+            </div>
+            <div>
+              <Label>Email</Label>
+              <Input
+                className="mt-2"
+                disabled={Boolean(profile)}
+                onChange={(event) => setValues((current) => ({ ...current, email: event.target.value }))}
+                required
+                type="email"
+                value={values.email}
+              />
+            </div>
+            {!profile ? (
+              <div>
+                <Label>Senha temporária</Label>
+                <Input
+                  className="mt-2"
+                  minLength={6}
+                  onChange={(event) => setValues((current) => ({ ...current, password: event.target.value }))}
+                  required
+                  type="password"
+                  value={values.password}
+                />
+              </div>
+            ) : null}
+            <div>
+              <Label>Role</Label>
+              <Select
+                onValueChange={(value) => setValues((current) => ({ ...current, role: value as UserRole }))}
+                value={values.role}
+              >
+                <SelectTrigger className="mt-2 w-full">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {roleOptions.map((role) => (
+                    <SelectItem key={role} value={role}>
+                      {roleLabels[role]}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label>Setor</Label>
+              <Input
+                className="mt-2"
+                onChange={(event) => setValues((current) => ({ ...current, sector_id: event.target.value }))}
+                placeholder="BAR"
+                value={values.sector_id || ""}
+              />
+            </div>
+          </div>
 
-        <div className="mt-6">
-          <label className="inline-flex items-center gap-3 rounded-lg border border-charcoal/10 px-4 py-3 text-sm font-bold text-graphite">
-            <input
-              checked={values.active}
-              onChange={(event) => setValues((current) => ({ ...current, active: event.target.checked }))}
-              type="checkbox"
-            />
-            Ativo
-          </label>
-        </div>
+          <div className="mt-6">
+            <Label className="inline-flex items-center gap-3 rounded-lg border border-charcoal/10 px-4 py-3 text-sm font-bold text-graphite">
+              <Checkbox
+                checked={values.active}
+                onCheckedChange={(checked) => setValues((current) => ({ ...current, active: checked === true }))}
+              />
+              Ativo
+            </Label>
+          </div>
 
-        <div className="mt-8 flex justify-end gap-3">
-          <button
-            className="focus-ring rounded-lg border border-charcoal/10 px-5 py-3 text-sm font-black text-muted hover:text-graphite"
-            onClick={onClose}
-            type="button"
-          >
-            Cancelar
-          </button>
-          <button
-            className="focus-ring rounded-lg bg-graphite px-5 py-3 text-sm font-black text-white disabled:opacity-60"
-            disabled={saving}
-            type="submit"
-          >
-            {saving ? "Salvando..." : "Salvar"}
-          </button>
-        </div>
-      </form>
-    </div>
-  );
-}
-
-function Field({ label, children }: { label: string; children: React.ReactNode }) {
-  return (
-    <label className="block">
-      <span className="text-sm font-bold text-graphite">{label}</span>
-      <span className="mt-2 block">{children}</span>
-    </label>
+          <DialogFooter className="mt-8">
+            <Button onClick={onClose} type="button" variant="outline">Cancelar</Button>
+            <Button disabled={saving} type="submit">{saving ? "Salvando..." : "Salvar"}</Button>
+          </DialogFooter>
+        </form>
+      </DialogContent>
+    </Dialog>
   );
 }
