@@ -82,6 +82,9 @@ fun BarApp() {
             if (savedAccess != null && savedRefresh != null) {
                 restoreSession(savedAccess, savedRefresh)
             }
+            onSessionUpdated = { access, refresh ->
+                prefs.edit().putString("access_token", access).putString("refresh_token", refresh).apply()
+            }
         }
     }
     val syncManager = remember { SyncManager(repository, supabaseClient) }

@@ -31,6 +31,7 @@ class SupabaseClient {
         private set
     var refreshToken: String? = null
         private set
+    var onSessionUpdated: ((accessToken: String, refreshToken: String) -> Unit)? = null
 
     fun restoreSession(access: String, refresh: String) {
         accessToken = access
@@ -99,6 +100,7 @@ class SupabaseClient {
                 val userObj = json.getJSONObject("user")
                 accessToken = token
                 refreshToken = refresh
+                onSessionUpdated?.invoke(token, refresh)
                 AuthResult.Success(token, refresh, userObj.getString("id"), userObj.optString("email", email))
             } else {
                 val message = try {
@@ -137,6 +139,7 @@ class SupabaseClient {
             val json = JSONObject(text)
             accessToken = json.getString("access_token")
             refreshToken = json.getString("refresh_token")
+            onSessionUpdated?.invoke(accessToken!!, refreshToken!!)
             true
         } catch (_: Exception) {
             false
