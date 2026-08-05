@@ -115,6 +115,7 @@ fun BarApp() {
             try {
                 withContext(Dispatchers.IO) {
                     repository.seedIfNeeded()
+                    syncManager.downloadProducts()
                     syncManager.syncWaitingUploads()
                     products = repository.products(category, search)
                     favorites = repository.favorites()
