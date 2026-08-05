@@ -18,14 +18,6 @@ const navItems: NavItem[] = [
   { href: "/administrativo", label: "Administrativo", icon: Settings }
 ];
 
-const extraItems: NavItem[] = [
-  { href: "/agenda", label: "Agenda" },
-  { href: "/deb", label: "DEB" },
-  { href: "/gbb", label: "GBB" },
-  { href: "/marketing", label: "Marketing" },
-  { href: "/bbb360-adm", label: "BBB360 ADM" }
-];
-
 export function AppShell({ children }: { children: React.ReactNode }) {
   const { session, loading } = useAuth();
   const pathname = usePathname();
@@ -53,7 +45,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-6">
           <Logo />
           <nav className="hidden items-center gap-1 lg:flex">
-            {[...navItems, ...extraItems].map((item) => {
+            {navItems.map((item) => {
               const active = pathname === item.href;
               const Icon = item.icon;
 
