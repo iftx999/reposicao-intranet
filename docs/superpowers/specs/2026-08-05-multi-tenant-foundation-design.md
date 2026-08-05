@@ -44,8 +44,9 @@ create table public.companies (
 - Add a check constraint: a row must either be a super admin with `company_id is null`, or a non-super-admin with `company_id is not null`:
   ```sql
   alter table public.profiles add constraint profiles_company_or_super_admin
-    check ((is_super_admin and company_id is null) or (not is_super_admin and company_id is not null));
+    check (is_super_admin or company_id is not null);
   ```
+  (A super admin's `company_id` is unconstrained — usually null, but the bootstrap super admin in this spec's Data migration section also holds a `company_id`, which this constraint permits. Every non-super-admin must have a `company_id`.)
 
 ### `products` and `replenishment_requests` changes
 
