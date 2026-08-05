@@ -10,7 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { supabase } from "@/lib/supabase";
-import type { Product, ProductFormValues } from "@/lib/types";
+import type { Product, ProductFormValues, Sector } from "@/lib/types";
 
 type ActiveFilter = "all" | "active" | "inactive";
 
@@ -18,6 +18,7 @@ export default function ProdutosPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [sectors, setSectors] = useState<Sector[]>([]);
   const [category, setCategory] = useState("");
   const [sector, setSector] = useState("");
   const [query, setQuery] = useState("");
@@ -39,12 +40,18 @@ export default function ProdutosPage() {
     setLoading(false);
   }
 
+  async function loadSectors() {
+    const { data } = await supabase.from("sectors").select("*").order("name");
+    setSectors((data || []) as Sector[]);
+  }
+
   useEffect(() => {
     void loadProducts();
+    void loadSectors();
   }, []);
 
   const categories = useMemo(() => Array.from(new Set(products.map((product) => product.category))).sort(), [products]);
-  const sectors = useMemo(() => Array.from(new Set(products.map((product) => product.sector_id))).sort(), [products]);
+  const sectorsById = useMemo(() => new Map(sectors.map((sector) => [sector.id, sector.name])), [sectors]);
 
   const filtered = products.filter((product) => {
     const matchesCategory = !category || product.category === category;
@@ -105,7 +112,20 @@ export default function ProdutosPage() {
       <section className="mt-6 rounded-lg border border-charcoal/10 bg-white p-5 shadow-sm">
         <div className="grid gap-4 md:grid-cols-4">
           <FilterSelect label="Categoria" onChange={setCategory} options={categories} value={category} />
-          <FilterSelect label="Setor" onChange={setSector} options={sectors} value={sector} />
+          <div>
+            <Label className="text-sm font-bold text-graphite">Setor</Label>
+            <Select onValueChange={(next) => setSector(next === "__all__" ? "" : next)} value={sector || "__all__"}>
+              <SelectTrigger className="mt-2 w-full">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="__all__">Todos</SelectItem>
+                {sectors.map((s) => (
+                  <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
           <div>
             <Label className="text-sm font-bold text-graphite">Nome</Label>
             <Input
@@ -172,7 +192,7 @@ export default function ProdutosPage() {
                 <TableRow className="hover:bg-ice" key={product.id}>
                   <TableCell className="font-bold text-graphite">{product.name}</TableCell>
                   <TableCell className="text-muted">{product.category}</TableCell>
-                  <TableCell className="text-muted">{product.sector_id}</TableCell>
+                  <TableCell className="text-muted">{sectorsById.get(product.sector_id) || "-"}</TableCell>
                   <TableCell className="text-muted">{product.unit}</TableCell>
                   <TableCell>
                     <Badge variant={product.active ? "success" : "secondary"}>{product.active ? "Sim" : "Não"}</Badge>

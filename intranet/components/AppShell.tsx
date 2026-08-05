@@ -1,6 +1,6 @@
 "use client";
 
-import { Building2, Expand, LayoutDashboard, LogOut, PackageSearch, Settings, ClipboardList, LucideIcon, Users } from "lucide-react";
+import { Building2, Expand, LayoutDashboard, Layers, LogOut, PackageSearch, Settings, ClipboardList, LucideIcon, Users } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect } from "react";
@@ -13,6 +13,7 @@ type NavItem = { href: string; label: string; icon?: LucideIcon };
 const navItems: NavItem[] = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/produtos", label: "Pesquisa/Produtos", icon: PackageSearch },
+  { href: "/setores", label: "Setores", icon: Layers },
   { href: "/solicitacoes", label: "Solicitações", icon: ClipboardList },
   { href: "/usuarios", label: "Usuários", icon: Users },
   { href: "/administrativo", label: "Administrativo", icon: Settings }

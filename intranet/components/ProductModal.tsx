@@ -13,7 +13,9 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import type { Product, ProductFormValues } from "@/lib/types";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { supabase } from "@/lib/supabase";
+import type { Product, ProductFormValues, Sector } from "@/lib/types";
 
 const emptyValues: ProductFormValues = {
   name: "",
@@ -35,6 +37,16 @@ export function ProductModal({
 }) {
   const [values, setValues] = useState<ProductFormValues>(emptyValues);
   const [saving, setSaving] = useState(false);
+  const [sectors, setSectors] = useState<Sector[]>([]);
+
+  useEffect(() => {
+    supabase
+      .from("sectors")
+      .select("*")
+      .eq("active", true)
+      .order("name")
+      .then(({ data }) => setSectors((data || []) as Sector[]));
+  }, []);
 
   useEffect(() => {
     setValues(product ? { ...product } : emptyValues);
@@ -82,12 +94,21 @@ export function ProductModal({
             </div>
             <div>
               <Label>Setor</Label>
-              <Input
-                className="mt-2"
-                onChange={(event) => setValues((current) => ({ ...current, sector_id: event.target.value }))}
-                required
+              <Select
+                onValueChange={(value) => setValues((current) => ({ ...current, sector_id: value }))}
                 value={values.sector_id}
-              />
+              >
+                <SelectTrigger className="mt-2 w-full">
+                  <SelectValue placeholder="Selecione um setor" />
+                </SelectTrigger>
+                <SelectContent>
+                  {sectors.map((sector) => (
+                    <SelectItem key={sector.id} value={sector.id}>
+                      {sector.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
             <div>
               <Label>Unidade</Label>
