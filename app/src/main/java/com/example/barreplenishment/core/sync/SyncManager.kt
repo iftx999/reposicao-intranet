@@ -23,7 +23,7 @@ class SyncManager(
 
     suspend fun downloadProducts(): Boolean {
         val remote = supabase.fetchProducts() ?: return false
-        repository.replaceProducts(remote)
+        repository.replaceProducts(remote.products)
         return true
     }
 }

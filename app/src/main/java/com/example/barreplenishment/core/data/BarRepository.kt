@@ -19,11 +19,16 @@ class BarRepository(private val db: AppDatabase) {
     }
 
     suspend fun replaceProducts(products: List<ProductEntity>) {
-        if (products.isEmpty()) return
         db.withTransaction {
             productDao.deleteAll()
-            productDao.upsertAll(products)
+            if (products.isNotEmpty()) {
+                productDao.upsertAll(products)
+            }
         }
+    }
+
+    suspend fun clearProducts() {
+        productDao.deleteAll()
     }
 
     suspend fun products(category: String = "Todos", query: String = ""): List<ProductEntity> {

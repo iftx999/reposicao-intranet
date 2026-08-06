@@ -6,6 +6,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { Logo } from "@/components/Logo";
 import { useAuth } from "@/components/AuthProvider";
+import { Spinner } from "@/components/ui/spinner";
 import { supabase } from "@/lib/supabase";
 
 type NavItem = { href: string; label: string; icon?: LucideIcon };
@@ -33,7 +34,10 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   if (loading || !session) {
     return (
       <main className="grid min-h-screen place-items-center bg-graphite text-muted">
-        <span className="text-sm font-semibold">Carregando painel...</span>
+        <div className="flex flex-col items-center gap-4 text-center">
+          <Spinner size="lg" />
+          <span className="text-sm font-semibold">Carregando painel...</span>
+        </div>
       </main>
     );
   }

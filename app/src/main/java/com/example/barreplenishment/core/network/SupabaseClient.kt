@@ -10,7 +10,9 @@ import java.io.BufferedReader
 import java.io.InputStreamReader
 import java.io.OutputStreamWriter
 import java.net.HttpURLConnection
+import java.net.URLEncoder
 import java.net.URL
+import java.nio.charset.StandardCharsets
 
 sealed class AuthResult {
     data class Success(
@@ -23,6 +25,18 @@ sealed class AuthResult {
     data class Failure(val message: String) : AuthResult()
 }
 
+data class CurrentUserProfile(
+    val role: String,
+    val sectorId: String?,
+    val active: Boolean,
+    val isSuperAdmin: Boolean
+)
+
+data class ProductDownload(
+    val products: List<ProductEntity>,
+    val scopeKey: String
+)
+
 class SupabaseClient {
     private val baseUrl: String = BuildConfig.SUPABASE_URL.trimEnd('/')
     private val anonKey: String = BuildConfig.SUPABASE_ANON_KEY
@@ -33,15 +47,30 @@ class SupabaseClient {
     var refreshToken: String? = null
         private set
     var onSessionUpdated: ((accessToken: String, refreshToken: String) -> Unit)? = null
+    private var userId: String? = null
+    private var currentProfile: CurrentUserProfile? = null
 
     fun restoreSession(access: String, refresh: String) {
         accessToken = access
         refreshToken = refresh
+        currentProfile = null
     }
 
-    fun fetchProducts(): List<ProductEntity>? {
+    fun fetchProducts(): ProductDownload? {
         if (!enabled) return null
-        val url = URL("$baseUrl/rest/v1/products?select=id,sector_id,name,category,unit,active,favorite&active=eq.true")
+        val profile = fetchCurrentProfile() ?: return ProductDownload(emptyList(), "profile_unavailable")
+        if (!profile.active) return ProductDownload(emptyList(), "inactive")
+
+        val productSectorFilter = if (profile.isSuperAdmin || profile.role == "admin" || profile.role == "gestor") {
+            null
+        } else {
+            val sectorId = profile.sectorId?.takeIf { it.isNotBlank() } ?: return ProductDownload(emptyList(), "operator:no_sector")
+            val resolvedSectorId = resolveProductSectorId(sectorId) ?: return ProductDownload(emptyList(), "operator:unresolved_sector")
+            "sector_id=eq.${urlEncode(resolvedSectorId)}"
+        }
+        val scopeKey = productSectorFilter ?: "company_all"
+        val filter = productSectorFilter?.let { "&$it" } ?: ""
+        val url = URL("$baseUrl/rest/v1/products?select=id,sector_id,name,category,unit,active,favorite&active=eq.true$filter")
         val connection = (url.openConnection() as HttpURLConnection).apply {
             requestMethod = "GET"
             connectTimeout = 8000
@@ -54,7 +83,7 @@ class SupabaseClient {
             if (code !in 200..299) return null
             val text = BufferedReader(InputStreamReader(connection.inputStream)).use { it.readText() }
             val array = JSONArray(text)
-            (0 until array.length()).map { i ->
+            val products = (0 until array.length()).map { i ->
                 val obj = array.getJSONObject(i)
                 ProductEntity(
                     id = obj.getString("id"),
@@ -66,6 +95,7 @@ class SupabaseClient {
                     favorite = obj.getBoolean("favorite")
                 )
             }
+            ProductDownload(products, scopeKey)
         } catch (_: Exception) {
             null
         } finally {
@@ -101,6 +131,8 @@ class SupabaseClient {
                 val userObj = json.getJSONObject("user")
                 accessToken = token
                 refreshToken = refresh
+                userId = userObj.getString("id")
+                currentProfile = null
                 onSessionUpdated?.invoke(token, refresh)
                 AuthResult.Success(token, refresh, userObj.getString("id"), userObj.optString("email", email))
             } else {
@@ -117,6 +149,84 @@ class SupabaseClient {
             connection.disconnect()
         }
     }
+
+    private fun fetchCurrentProfile(): CurrentUserProfile? {
+        currentProfile?.let { return it }
+        val currentUserId = userId ?: fetchUserId() ?: return null
+        val url = URL("$baseUrl/rest/v1/profiles?select=role,sector_id,active,is_super_admin&id=eq.${urlEncode(currentUserId)}&limit=1")
+        val connection = (url.openConnection() as HttpURLConnection).apply {
+            requestMethod = "GET"
+            connectTimeout = 8000
+            readTimeout = 8000
+            setRequestProperty("apikey", anonKey)
+            setRequestProperty("Authorization", "Bearer ${accessToken ?: anonKey}")
+        }
+        return try {
+            val code = connection.responseCode
+            if (code !in 200..299) return null
+            val text = BufferedReader(InputStreamReader(connection.inputStream)).use { it.readText() }
+            val array = JSONArray(text)
+            if (array.length() == 0) return null
+            val obj = array.getJSONObject(0)
+            CurrentUserProfile(
+                role = obj.optString("role", "operador"),
+                sectorId = obj.optString("sector_id").takeIf { it.isNotBlank() && it != "null" },
+                active = obj.optBoolean("active", false),
+                isSuperAdmin = obj.optBoolean("is_super_admin", false)
+            ).also { currentProfile = it }
+        } catch (_: Exception) {
+            null
+        } finally {
+            connection.disconnect()
+        }
+    }
+
+    private fun fetchUserId(): String? {
+        val url = URL("$baseUrl/auth/v1/user")
+        val connection = (url.openConnection() as HttpURLConnection).apply {
+            requestMethod = "GET"
+            connectTimeout = 8000
+            readTimeout = 8000
+            setRequestProperty("apikey", anonKey)
+            setRequestProperty("Authorization", "Bearer ${accessToken ?: anonKey}")
+        }
+        return try {
+            val code = connection.responseCode
+            if (code !in 200..299) return null
+            val text = BufferedReader(InputStreamReader(connection.inputStream)).use { it.readText() }
+            JSONObject(text).getString("id").also { userId = it }
+        } catch (_: Exception) {
+            null
+        } finally {
+            connection.disconnect()
+        }
+    }
+
+    private fun resolveProductSectorId(profileSectorId: String): String? {
+        if (UUID_REGEX.matches(profileSectorId)) return profileSectorId
+        val url = URL("$baseUrl/rest/v1/sectors?select=id&name=eq.${urlEncode(profileSectorId)}&limit=1")
+        val connection = (url.openConnection() as HttpURLConnection).apply {
+            requestMethod = "GET"
+            connectTimeout = 8000
+            readTimeout = 8000
+            setRequestProperty("apikey", anonKey)
+            setRequestProperty("Authorization", "Bearer ${accessToken ?: anonKey}")
+        }
+        return try {
+            val code = connection.responseCode
+            if (code !in 200..299) return null
+            val text = BufferedReader(InputStreamReader(connection.inputStream)).use { it.readText() }
+            val array = JSONArray(text)
+            if (array.length() == 0) null else array.getJSONObject(0).getString("id")
+        } catch (_: Exception) {
+            null
+        } finally {
+            connection.disconnect()
+        }
+    }
+
+    private fun urlEncode(value: String): String = URLEncoder.encode(value, StandardCharsets.UTF_8.name())
+
     private fun refreshAccessToken(): Boolean {
         val currentRefresh = refreshToken ?: return false
         val url = URL("$baseUrl/auth/v1/token?grant_type=refresh_token")
@@ -140,6 +250,7 @@ class SupabaseClient {
             val json = JSONObject(text)
             accessToken = json.getString("access_token")
             refreshToken = json.getString("refresh_token")
+            currentProfile = null
             onSessionUpdated?.invoke(accessToken!!, refreshToken!!)
             true
         } catch (_: Exception) {
@@ -223,5 +334,9 @@ class SupabaseClient {
         } finally {
             connection.disconnect()
         }
+    }
+
+    private companion object {
+        val UUID_REGEX = Regex("^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$")
     }
 }

@@ -155,6 +155,7 @@ fun BarApp() {
                             authLoading = false
                             when (result) {
                                 is AuthResult.Success -> {
+                                    withContext(Dispatchers.IO) { repository.clearProducts() }
                                     prefs.edit()
                                         .putBoolean("logged_in", true)
                                         .putString("user_name", result.userEmail)
@@ -189,6 +190,10 @@ fun BarApp() {
                 subtitle = "Turno atual - $pending pendentes",
                 onLogout = {
                     prefs.edit().clear().apply()
+                    products = emptyList()
+                    favorites = emptyList()
+                    cart.clear()
+                    scope.launch { withContext(Dispatchers.IO) { repository.clearProducts() } }
                     loggedIn = false
                 }
             )

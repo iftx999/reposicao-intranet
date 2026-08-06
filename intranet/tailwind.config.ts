@@ -42,6 +42,45 @@ const config: Config = {
         panel: "0 24px 70px rgba(22, 25, 29, 0.16)",
         dialog: "0 12px 32px rgba(22, 25, 29, 0.14)",
         soft: "0 1px 2px rgba(22, 25, 29, 0.04), 0 8px 20px rgba(22, 25, 29, 0.06)"
+      },
+      keyframes: {
+        "page-enter": {
+          from: { opacity: "0", transform: "translateY(6px)" },
+          to: { opacity: "1", transform: "translateY(0)" }
+        },
+        "dialog-overlay-in": {
+          from: { opacity: "0" },
+          to: { opacity: "1" }
+        },
+        "dialog-overlay-out": {
+          from: { opacity: "1" },
+          to: { opacity: "0" }
+        },
+        "dialog-content-in": {
+          from: { opacity: "0", transform: "translate(-50%, -50%) scale(0.95)" },
+          to: { opacity: "1", transform: "translate(-50%, -50%) scale(1)" }
+        },
+        "dialog-content-out": {
+          from: { opacity: "1", transform: "translate(-50%, -50%) scale(1)" },
+          to: { opacity: "0", transform: "translate(-50%, -50%) scale(0.95)" }
+        },
+        "select-content-in": {
+          from: { opacity: "0", transform: "scale(0.95)" },
+          to: { opacity: "1", transform: "scale(1)" }
+        },
+        "select-content-out": {
+          from: { opacity: "1", transform: "scale(1)" },
+          to: { opacity: "0", transform: "scale(0.95)" }
+        }
+      },
+      animation: {
+        "page-enter": "page-enter 200ms cubic-bezier(0.16, 1, 0.3, 1) both",
+        "dialog-overlay-in": "dialog-overlay-in 160ms cubic-bezier(0.16, 1, 0.3, 1) both",
+        "dialog-overlay-out": "dialog-overlay-out 120ms cubic-bezier(0.7, 0, 0.84, 0) both",
+        "dialog-content-in": "dialog-content-in 180ms cubic-bezier(0.16, 1, 0.3, 1) both",
+        "dialog-content-out": "dialog-content-out 120ms cubic-bezier(0.7, 0, 0.84, 0) both",
+        "select-content-in": "select-content-in 160ms cubic-bezier(0.16, 1, 0.3, 1) both",
+        "select-content-out": "select-content-out 120ms cubic-bezier(0.7, 0, 0.84, 0) both"
       }
     }
   },
