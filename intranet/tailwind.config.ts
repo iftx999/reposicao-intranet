@@ -12,7 +12,12 @@ const config: Config = {
         coral: "#FF5A4F",
         amber: "#F6B44B",
         soda: "#48A9F8",
-        muted: "#6B727A",
+        muted: "#8A919A",
+        // Alias para os primitivos shadcn, que usam `text-muted-foreground`.
+        // Sem isso a classe nao existe e o texto herda branco.
+        "muted-foreground": "#8A919A",
+        subtle: "#6B727A",
+        "badge-neutral": "#A8B0B8",
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
         card: { DEFAULT: "hsl(var(--card))", foreground: "hsl(var(--card-foreground))" },
@@ -34,7 +39,9 @@ const config: Config = {
         sm: "calc(var(--radius) - 4px)"
       },
       boxShadow: {
-        panel: "0 24px 70px rgba(22, 25, 29, 0.16)"
+        panel: "0 24px 70px rgba(22, 25, 29, 0.16)",
+        dialog: "0 12px 32px rgba(22, 25, 29, 0.14)",
+        soft: "0 1px 2px rgba(22, 25, 29, 0.04), 0 8px 20px rgba(22, 25, 29, 0.06)"
       }
     }
   },

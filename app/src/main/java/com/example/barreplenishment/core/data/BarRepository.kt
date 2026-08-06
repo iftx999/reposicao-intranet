@@ -1,5 +1,6 @@
 ﻿package com.example.barreplenishment.core.data
 
+import android.util.Log
 import androidx.room.withTransaction
 import com.example.barreplenishment.core.database.AppDatabase
 import com.example.barreplenishment.core.database.ProductEntity
@@ -79,6 +80,7 @@ class BarRepository(private val db: AppDatabase) {
             requestDao.upsertItems(items)
             requestDao.upsertEvent(event(id, RequestStatus.Pending, "Solicitação criada", request.createdBy, now))
         }
+        Log.d("BarSync", "createRequest: id=${id} items.size=${items.size}")
         return id
     }
 
@@ -104,11 +106,12 @@ class BarRepository(private val db: AppDatabase) {
 
     suspend fun markSynced(id: String) = requestDao.markSynced(id, System.currentTimeMillis())
 
-    private suspend fun details(request: ReplenishmentRequestEntity): RequestWithDetails = RequestWithDetails(
-        request = request,
-        items = requestDao.itemsFor(request.id),
-        events = requestDao.eventsFor(request.id)
-    )
+    private suspend fun details(request: ReplenishmentRequestEntity): RequestWithDetails {
+        val items = requestDao.itemsFor(request.id)
+        val events = requestDao.eventsFor(request.id)
+        Log.d("BarSync", "details: requestId=${request.id} items=${items.size} events=${events.size}")
+        return RequestWithDetails(request = request, items = items, events = events)
+    }
 
     private fun event(requestId: String, status: String, message: String, user: String, now: Long) = RequestStatusEventEntity(
         id = UUID.randomUUID().toString(),

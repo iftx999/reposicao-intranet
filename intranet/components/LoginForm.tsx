@@ -58,9 +58,9 @@ export function LoginForm() {
         <div className="mx-auto w-full max-w-md">
           <Logo />
           <div className="mt-12">
-            <p className="text-xs font-black uppercase tracking-[0.22em] text-muted">BAR Intranet</p>
+            <p className="text-xs font-black uppercase tracking-[0.22em] text-subtle">BAR Intranet</p>
             <h1 className="mt-3 text-5xl font-black text-graphite">Acesso</h1>
-            <p className="mt-3 text-sm leading-6 text-muted">
+            <p className="mt-3 text-sm leading-6 text-subtle">
               Entre com seu email e senha para administrar produtos e solicitações de reposição.
             </p>
           </div>
@@ -75,7 +75,7 @@ export function LoginForm() {
             <label className="block">
               <span className="text-sm font-bold text-graphite">Email</span>
               <span className="mt-2 flex h-12 items-center gap-3 rounded-lg border border-charcoal/10 bg-white px-4">
-                <Mail className="h-5 w-5 text-muted" />
+                <Mail className="h-5 w-5 text-subtle" />
                 <input
                   className="h-full flex-1 bg-transparent text-sm text-graphite outline-none"
                   onChange={(event) => setEmail(event.target.value)}
@@ -88,7 +88,7 @@ export function LoginForm() {
             <label className="block">
               <span className="text-sm font-bold text-graphite">Senha</span>
               <span className="mt-2 flex h-12 items-center gap-3 rounded-lg border border-charcoal/10 bg-white px-4">
-                <Lock className="h-5 w-5 text-muted" />
+                <Lock className="h-5 w-5 text-subtle" />
                 <input
                   className="h-full flex-1 bg-transparent text-sm text-graphite outline-none"
                   onChange={(event) => setPassword(event.target.value)}
@@ -98,7 +98,7 @@ export function LoginForm() {
                 />
               </span>
             </label>
-            <label className="flex items-center gap-3 text-sm font-semibold text-muted">
+            <label className="flex items-center gap-3 text-sm font-semibold text-subtle">
               <input
                 checked={remember}
                 className="h-4 w-4 rounded border-charcoal/20 text-graphite"

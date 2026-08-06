@@ -1,5 +1,6 @@
 package com.example.barreplenishment.core.network
 
+import android.util.Log
 import com.example.barreplenishment.BuildConfig
 import com.example.barreplenishment.core.data.RequestWithDetails
 import com.example.barreplenishment.core.database.ProductEntity
@@ -164,6 +165,7 @@ class SupabaseClient {
             .put("created_at", isoTimestamp(request.createdAt))
             .put("updated_at", isoTimestamp(request.updatedAt))
             .put("synced_at", isoTimestamp(System.currentTimeMillis()))
+        Log.d("BarSync", "upsertRequest: posting request id=${request.id}")
         if (!post("replenishment_requests", JSONArray().put(body))) return false
 
         val items = JSONArray()
@@ -178,6 +180,7 @@ class SupabaseClient {
                     .put("notes", item.notes)
             )
         }
+        Log.d("BarSync", "upsertRequest: items.length()=${items.length()} for request ${request.id}")
         if (items.length() > 0 && !post("replenishment_request_items", items)) return false
 
         val events = JSONArray()
@@ -192,6 +195,7 @@ class SupabaseClient {
                     .put("created_at", isoTimestamp(event.createdAt))
             )
         }
+        Log.d("BarSync", "upsertRequest: events.length()=${events.length()} for request ${request.id}")
         return events.length() == 0 || post("request_status_events", events)
     }
     private fun post(table: String, body: JSONArray, retrying: Boolean = false): Boolean {

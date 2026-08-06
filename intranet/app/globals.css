@@ -1,51 +1,51 @@
 @import "tw-animate-css";
-@import "shadcn/tailwind.css";
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
   :root {
-    --background: 210 20% 98%;        /* ice #F7F8FA */
-    --foreground: 220 14% 9%;         /* graphite #16191D */
-    --card: 0 0% 100%;
-    --card-foreground: 220 14% 9%;    /* graphite */
-    --popover: 0 0% 100%;
-    --popover-foreground: 220 14% 9%; /* graphite */
-    --primary: 220 14% 9%;            /* graphite */
-    --primary-foreground: 0 0% 100%;
-    --secondary: 210 20% 98%;         /* ice */
-    --secondary-foreground: 220 14% 9%; /* graphite */
-    --muted: 210 20% 98%;             /* ice */
-    --muted-foreground: 216 6% 44%;   /* muted #6B727A */
+    /* Tema escuro. Superficies solidas: graphite = pagina, charcoal = painel. */
+    --background: 214 14% 10%;        /* graphite #16191D */
+    --foreground: 0 0% 100%;          /* white */
+    --card: 216 12% 16%;              /* charcoal #24282E */
+    --card-foreground: 0 0% 100%;     /* white */
+    --popover: 216 12% 16%;           /* charcoal */
+    --popover-foreground: 0 0% 100%;  /* white */
+    --primary: 78 71% 66%;            /* lime #B6E85F - CTA principal */
+    --primary-foreground: 214 14% 10%; /* graphite sobre lime */
+    --secondary: 210 8% 15%;          /* white/5 sobre graphite, superficie sutil */
+    --secondary-foreground: 220 23% 98%; /* ice #F7F8FA */
+    --muted: 210 8% 15%;              /* superficie sutil */
+    --muted-foreground: 214 7% 57%;   /* muted #8A919A - 4.65:1 sobre charcoal */
     --accent: 207 93% 62%;            /* soda #48A9F8 */
-    --accent-foreground: 0 0% 100%;
+    --accent-foreground: 214 14% 10%; /* graphite sobre soda (6.98:1; branco daria 2.53:1) */
     --destructive: 4 100% 65%;        /* coral #FF5A4F */
-    --destructive-foreground: 0 0% 100%;
+    --destructive-foreground: 214 14% 10%; /* graphite sobre coral (5.73:1; branco daria 3.08:1) */
     --success: 78 71% 66%;            /* lime #B6E85F */
-    --success-foreground: 220 14% 9%; /* graphite */
+    --success-foreground: 214 14% 10%; /* graphite */
     --warning: 38 90% 63%;            /* amber #F6B44B */
-    --warning-foreground: 220 14% 9%; /* graphite */
-    --border: 220 15% 11% / 0.1;      /* charcoal/10, corresponde ao border-charcoal/10 ja usado */
-    --input: 220 15% 11% / 0.1;
-    --ring: 207 93% 62%;              /* soda, corresponde ao focus:border-soda ja usado */
-    --radius: 0.5rem;                 /* corresponde ao rounded-lg ja usado */
-    --chart-1: 220 14% 9%;
-    --chart-2: 216 6% 44%;
-    --chart-3: 207 93% 62%;
-    --chart-4: 78 71% 66%;
-    --chart-5: 38 90% 63%;
-    --sidebar: 210 20% 98%;
-    --sidebar-foreground: 220 14% 9%;
-    --sidebar-primary: 220 14% 9%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 207 93% 62%;
-    --sidebar-accent-foreground: 0 0% 100%;
-    --sidebar-border: 220 15% 11% / 0.1;
+    --warning-foreground: 214 14% 10%; /* graphite */
+    --border: 0 0% 100% / 0.1;        /* white/10 */
+    --input: 0 0% 100% / 0.1;
+    --ring: 207 93% 62%;              /* soda, cor de foco */
+    --radius: 0.5rem;
+    --chart-1: 78 71% 66%;
+    --chart-2: 207 93% 62%;
+    --chart-3: 38 90% 63%;
+    --chart-4: 4 100% 65%;
+    --chart-5: 214 7% 57%;
+    --sidebar: 216 12% 16%;           /* charcoal */
+    --sidebar-foreground: 0 0% 100%;
+    --sidebar-primary: 78 71% 66%;    /* lime */
+    --sidebar-primary-foreground: 214 14% 10%;
+    --sidebar-accent: 207 93% 62%;    /* soda */
+    --sidebar-accent-foreground: 214 14% 10%;
+    --sidebar-border: 0 0% 100% / 0.1;
     --sidebar-ring: 207 93% 62%;
   }
   * {
-    @apply border-border outline-ring/50;
+    @apply border-border outline-soda;
   }
   body {
     @apply bg-background text-foreground;
@@ -66,8 +66,8 @@ body {
 
 body {
   margin: 0;
-  background: #f7f8fa;
-  color: #16191d;
+  background: #16191d;
+  color: #ffffff;
 }
 
 button,

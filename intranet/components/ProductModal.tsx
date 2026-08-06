@@ -1,19 +1,12 @@
 "use client";
 
+import { Dialog as DialogPrimitive } from "radix-ui";
 import { FormEvent, useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle
-} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { ToggleSwitch } from "@/components/ui/toggle-switch";
 import { supabase } from "@/lib/supabase";
 import type { Product, ProductFormValues, Sector } from "@/lib/types";
 
@@ -27,6 +20,14 @@ const emptyValues: ProductFormValues = {
   quantity: 0,
   min_quantity: 0
 };
+
+const fieldClassName =
+  "mt-2 h-auto w-full rounded-full border border-white/10 bg-graphite px-4 py-2.5 text-sm text-ice outline-none placeholder:text-subtle transition focus-visible:border-soda/60 focus-visible:ring-2 focus-visible:ring-soda/25";
+
+const selectContentClassName =
+  "rounded-[28px] border border-white/[0.08] bg-charcoal p-2 text-ice shadow-dialog ring-0";
+
+const selectItemClassName = "rounded-full px-3 py-2 text-sm text-ice focus:bg-white/10 focus:text-white";
 
 export function ProductModal({
   product,
@@ -62,112 +63,132 @@ export function ProductModal({
   }
 
   return (
-    <Dialog
+    <DialogPrimitive.Root
       onOpenChange={(open) => {
         if (!open) onClose();
       }}
       open
     >
-      <DialogContent className="max-w-2xl">
-        <form onSubmit={submit}>
-          <DialogHeader>
-            <DialogTitle>{product ? "Editar produto" : "Adicionar produto"}</DialogTitle>
-            <DialogDescription>Dados compartilhados com o app BAR.</DialogDescription>
-          </DialogHeader>
+      <DialogPrimitive.Portal>
+        <DialogPrimitive.Overlay className="fixed inset-0 z-50 bg-black/60" />
+        <DialogPrimitive.Content className="fixed left-1/2 top-1/2 z-50 grid w-full max-w-[calc(100%-2rem)] -translate-x-1/2 -translate-y-1/2 gap-4 rounded-[28px] border border-white/[0.08] bg-charcoal p-6 text-sm text-ice shadow-dialog outline-none sm:max-w-2xl">
+          <form onSubmit={submit}>
+            <div className="flex flex-col gap-2">
+              <DialogPrimitive.Title className="text-lg font-black text-white">
+                {product ? "Editar produto" : "Adicionar produto"}
+              </DialogPrimitive.Title>
+              <DialogPrimitive.Description className="text-sm text-muted">
+                Dados compartilhados com o app BAR.
+              </DialogPrimitive.Description>
+            </div>
 
-          <div className="mt-6 grid gap-4 sm:grid-cols-2">
-            <div>
-              <Label>Nome</Label>
-              <Input
-                className="mt-2"
-                onChange={(event) => setValues((current) => ({ ...current, name: event.target.value }))}
-                required
-                value={values.name}
-              />
+            <div className="mt-6 grid gap-4 sm:grid-cols-2">
+              <div>
+                <Label className="text-sm font-bold text-muted">Nome</Label>
+                <Input
+                  className={fieldClassName}
+                  onChange={(event) => setValues((current) => ({ ...current, name: event.target.value }))}
+                  required
+                  value={values.name}
+                />
+              </div>
+              <div>
+                <Label className="text-sm font-bold text-muted">Categoria</Label>
+                <Input
+                  className={fieldClassName}
+                  onChange={(event) => setValues((current) => ({ ...current, category: event.target.value }))}
+                  required
+                  value={values.category}
+                />
+              </div>
+              <div>
+                <Label className="text-sm font-bold text-muted">Setor</Label>
+                <Select
+                  onValueChange={(value) => setValues((current) => ({ ...current, sector_id: value }))}
+                  value={values.sector_id}
+                >
+                  <SelectTrigger className={fieldClassName}>
+                    <SelectValue placeholder="Selecione um setor" />
+                  </SelectTrigger>
+                  <SelectContent className={selectContentClassName}>
+                    {sectors.map((sector) => (
+                      <SelectItem className={selectItemClassName} key={sector.id} value={sector.id}>
+                        {sector.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label className="text-sm font-bold text-muted">Unidade</Label>
+                <Input
+                  className={fieldClassName}
+                  onChange={(event) => setValues((current) => ({ ...current, unit: event.target.value }))}
+                  required
+                  value={values.unit}
+                />
+              </div>
+              <div>
+                <Label className="text-sm font-bold text-muted">Quantidade</Label>
+                <Input
+                  className={fieldClassName}
+                  min={0}
+                  onChange={(event) => setValues((current) => ({ ...current, quantity: Number(event.target.value) }))}
+                  required
+                  type="number"
+                  value={values.quantity}
+                />
+              </div>
+              <div>
+                <Label className="text-sm font-bold text-muted">Quantidade mínima</Label>
+                <Input
+                  className={fieldClassName}
+                  min={0}
+                  onChange={(event) =>
+                    setValues((current) => ({ ...current, min_quantity: Number(event.target.value) }))
+                  }
+                  required
+                  type="number"
+                  value={values.min_quantity}
+                />
+              </div>
             </div>
-            <div>
-              <Label>Categoria</Label>
-              <Input
-                className="mt-2"
-                onChange={(event) => setValues((current) => ({ ...current, category: event.target.value }))}
-                required
-                value={values.category}
-              />
-            </div>
-            <div>
-              <Label>Setor</Label>
-              <Select
-                onValueChange={(value) => setValues((current) => ({ ...current, sector_id: value }))}
-                value={values.sector_id}
-              >
-                <SelectTrigger className="mt-2 w-full">
-                  <SelectValue placeholder="Selecione um setor" />
-                </SelectTrigger>
-                <SelectContent>
-                  {sectors.map((sector) => (
-                    <SelectItem key={sector.id} value={sector.id}>
-                      {sector.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div>
-              <Label>Unidade</Label>
-              <Input
-                className="mt-2"
-                onChange={(event) => setValues((current) => ({ ...current, unit: event.target.value }))}
-                required
-                value={values.unit}
-              />
-            </div>
-            <div>
-              <Label>Quantidade</Label>
-              <Input
-                className="mt-2"
-                min={0}
-                onChange={(event) => setValues((current) => ({ ...current, quantity: Number(event.target.value) }))}
-                required
-                type="number"
-                value={values.quantity}
-              />
-            </div>
-            <div>
-              <Label>Quantidade mínima</Label>
-              <Input
-                className="mt-2"
-                min={0}
-                onChange={(event) => setValues((current) => ({ ...current, min_quantity: Number(event.target.value) }))}
-                required
-                type="number"
-                value={values.min_quantity}
-              />
-            </div>
-          </div>
 
-          <div className="mt-6 flex flex-wrap gap-4">
-            <Label className="flex items-center gap-3 rounded-lg border border-charcoal/10 px-4 py-3 text-sm font-bold text-graphite">
-              <Checkbox
+            <div className="mt-6 flex flex-wrap gap-4">
+              <ToggleSwitch
                 checked={values.active}
-                onCheckedChange={(checked) => setValues((current) => ({ ...current, active: checked === true }))}
+                label="Ativo"
+                onClick={() => setValues((current) => ({ ...current, active: !current.active }))}
+                tone="lime"
               />
-              Ativo
-            </Label>
-            <Label className="flex items-center gap-3 rounded-lg border border-charcoal/10 px-4 py-3 text-sm font-bold text-graphite">
-              <Checkbox
+              <ToggleSwitch
                 checked={values.favorite}
-                onCheckedChange={(checked) => setValues((current) => ({ ...current, favorite: checked === true }))}
+                label="Favorito"
+                onClick={() => setValues((current) => ({ ...current, favorite: !current.favorite }))}
+                tone="lime"
               />
-              Favorito
-            </Label>
-          </div>
+            </div>
 
-          <DialogFooter className="mt-8">
-            <Button onClick={onClose} type="button" variant="outline">Cancelar</Button>
-            <Button disabled={saving} type="submit">{saving ? "Salvando..." : "Salvar"}</Button>
-          </DialogFooter>
-        </form>
-      </DialogContent>
-    </Dialog>
+            <div className="mt-8 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+              <Button
+                className="h-auto rounded-full border border-white/10 bg-white/5 px-4 py-2.5 text-sm font-semibold text-ice transition hover:bg-white/10"
+                onClick={onClose}
+                type="button"
+                variant="outline"
+              >
+                Cancelar
+              </Button>
+              <Button
+                className="h-auto rounded-full bg-lime px-5 py-3 text-sm font-semibold text-graphite shadow-[0_16px_38px_rgba(182,232,95,0.2)] transition hover:brightness-95 active:scale-[0.98]"
+                disabled={saving}
+                type="submit"
+              >
+                {saving ? "Salvando..." : "Salvar"}
+              </Button>
+            </div>
+          </form>
+        </DialogPrimitive.Content>
+      </DialogPrimitive.Portal>
+    </DialogPrimitive.Root>
   );
 }
