@@ -47,7 +47,24 @@ export type RequestStatusEvent = {
   created_at: string;
 };
 
-export type ProductFormValues = Omit<Product, "id" | "company_id">;
+export type ProductFormValues = Omit<Product, "id" | "company_id" | "quantity">;
+
+export type StockMovementType = "entrada" | "saida" | "ajuste";
+export type StockMovementSource = "manual" | "replenishment" | "inventory";
+
+export type StockMovement = {
+  id: string;
+  company_id: string;
+  product_id: string;
+  movement_type: StockMovementType;
+  delta: number;
+  balance_after: number;
+  source: StockMovementSource;
+  reference_id: string | null;
+  reason: string | null;
+  created_by: string | null;
+  created_at: string;
+};
 
 export type UserRole = "admin" | "gestor" | "operador";
 

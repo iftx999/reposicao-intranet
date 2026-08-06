@@ -1,7 +1,7 @@
 "use client";
 
 import { Dialog as DialogPrimitive } from "radix-ui";
-import { FormEvent, useEffect, useState } from "react";
+import { type FormEvent, useEffect, useId, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -17,7 +17,6 @@ const emptyValues: ProductFormValues = {
   unit: "",
   active: true,
   favorite: false,
-  quantity: 0,
   min_quantity: 0
 };
 
@@ -41,6 +40,13 @@ export function ProductModal({
   const [values, setValues] = useState<ProductFormValues>(emptyValues);
   const [saving, setSaving] = useState(false);
   const [sectors, setSectors] = useState<Sector[]>([]);
+  const nameId = useId();
+  const categoryId = useId();
+  const sectorLabelId = useId();
+  const unitId = useId();
+  const minQuantityId = useId();
+  const activeLabelId = useId();
+  const favoriteLabelId = useId();
 
   useEffect(() => {
     supabase
@@ -52,7 +58,13 @@ export function ProductModal({
   }, []);
 
   useEffect(() => {
-    setValues(product ? { ...product } : emptyValues);
+    if (!product) {
+      setValues(emptyValues);
+      return;
+    }
+
+    const { quantity: _quantity, company_id: _companyId, id: _id, ...editableProduct } = product;
+    setValues(editableProduct);
   }, [product]);
 
   async function submit(event: FormEvent<HTMLFormElement>) {
@@ -84,30 +96,32 @@ export function ProductModal({
 
             <div className="mt-6 grid gap-4 sm:grid-cols-2">
               <div>
-                <Label className="text-sm font-bold text-muted">Nome</Label>
+                <Label className="text-sm font-bold text-muted" htmlFor={nameId}>Nome</Label>
                 <Input
                   className={fieldClassName}
+                  id={nameId}
                   onChange={(event) => setValues((current) => ({ ...current, name: event.target.value }))}
                   required
                   value={values.name}
                 />
               </div>
               <div>
-                <Label className="text-sm font-bold text-muted">Categoria</Label>
+                <Label className="text-sm font-bold text-muted" htmlFor={categoryId}>Categoria</Label>
                 <Input
                   className={fieldClassName}
+                  id={categoryId}
                   onChange={(event) => setValues((current) => ({ ...current, category: event.target.value }))}
                   required
                   value={values.category}
                 />
               </div>
               <div>
-                <Label className="text-sm font-bold text-muted">Setor</Label>
+                <Label className="text-sm font-bold text-muted" id={sectorLabelId}>Setor</Label>
                 <Select
                   onValueChange={(value) => setValues((current) => ({ ...current, sector_id: value }))}
                   value={values.sector_id}
                 >
-                  <SelectTrigger className={fieldClassName}>
+                  <SelectTrigger aria-labelledby={sectorLabelId} className={fieldClassName}>
                     <SelectValue placeholder="Selecione um setor" />
                   </SelectTrigger>
                   <SelectContent className={selectContentClassName}>
@@ -120,29 +134,20 @@ export function ProductModal({
                 </Select>
               </div>
               <div>
-                <Label className="text-sm font-bold text-muted">Unidade</Label>
+                <Label className="text-sm font-bold text-muted" htmlFor={unitId}>Unidade</Label>
                 <Input
                   className={fieldClassName}
+                  id={unitId}
                   onChange={(event) => setValues((current) => ({ ...current, unit: event.target.value }))}
                   required
                   value={values.unit}
                 />
               </div>
               <div>
-                <Label className="text-sm font-bold text-muted">Quantidade</Label>
+                <Label className="text-sm font-bold text-muted" htmlFor={minQuantityId}>Quantidade mínima</Label>
                 <Input
                   className={fieldClassName}
-                  min={0}
-                  onChange={(event) => setValues((current) => ({ ...current, quantity: Number(event.target.value) }))}
-                  required
-                  type="number"
-                  value={values.quantity}
-                />
-              </div>
-              <div>
-                <Label className="text-sm font-bold text-muted">Quantidade mínima</Label>
-                <Input
-                  className={fieldClassName}
+                  id={minQuantityId}
                   min={0}
                   onChange={(event) =>
                     setValues((current) => ({ ...current, min_quantity: Number(event.target.value) }))
@@ -156,14 +161,16 @@ export function ProductModal({
 
             <div className="mt-6 flex flex-wrap gap-4">
               <ToggleSwitch
+                aria-labelledby={activeLabelId}
                 checked={values.active}
-                label="Ativo"
+                label={<span id={activeLabelId}>Ativo</span>}
                 onClick={() => setValues((current) => ({ ...current, active: !current.active }))}
                 tone="lime"
               />
               <ToggleSwitch
+                aria-labelledby={favoriteLabelId}
                 checked={values.favorite}
-                label="Favorito"
+                label={<span id={favoriteLabelId}>Favorito</span>}
                 onClick={() => setValues((current) => ({ ...current, favorite: !current.favorite }))}
                 tone="lime"
               />

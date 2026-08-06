@@ -15,7 +15,7 @@ const badgeClassName = "h-auto px-2.5 py-1 text-[11px] font-semibold";
 
 const sectorGridTemplateColumns = "minmax(220px,2fr) minmax(120px,0.8fr) minmax(84px,0.5fr)";
 
-const sectorColumnLabels = ["Nome", "Ativo", "Acoes"];
+const sectorColumnLabels = ["Nome", "Ativo", "Ações"];
 
 export default function SetoresPage() {
   const [sectors, setSectors] = useState<Sector[]>([]);
@@ -93,8 +93,8 @@ export default function SetoresPage() {
           className="hidden border-b border-white/[0.06] px-5 py-3 text-[11px] font-bold uppercase tracking-[0.16em] text-muted md:grid md:items-center md:gap-4"
           style={{ gridTemplateColumns: sectorGridTemplateColumns }}
         >
-          {sectorColumnLabels.map((label) => (
-            <div className={label === "Acoes" ? "text-right" : undefined} key={label}>
+          {sectorColumnLabels.map((label, index) => (
+            <div className={index === sectorColumnLabels.length - 1 ? "text-right" : undefined} key={label}>
               {label}
             </div>
           ))}
@@ -156,7 +156,7 @@ function SectorListRow({ onEdit, sector }: { onEdit: () => void; sector: Sector 
       </div>
 
       <div className="mt-4 flex items-center justify-between gap-3 md:mt-0 md:justify-end">
-        <span className="text-xs font-semibold uppercase tracking-[0.12em] text-muted md:hidden">Acoes</span>
+        <span className="text-xs font-semibold uppercase tracking-[0.12em] text-muted md:hidden">Ações</span>
         <Button
           aria-label={`Editar ${sector.name}`}
           className="grid h-9 w-9 place-items-center rounded-full text-muted transition hover:bg-white/10 hover:text-soda"

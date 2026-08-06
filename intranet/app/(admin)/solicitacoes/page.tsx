@@ -1,6 +1,7 @@
 "use client";
 
 import { Ban, CheckCircle2, ChevronsRight } from "lucide-react";
+import { useSearchParams } from "next/navigation";
 import { type ReactNode, useEffect, useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -30,6 +31,7 @@ const requestGridTemplateColumns =
   "minmax(110px,0.8fr) minmax(150px,1fr) minmax(170px,1.1fr) minmax(110px,0.8fr) minmax(130px,0.9fr) minmax(170px,1fr)";
 
 const requestColumnLabels = ["ID", "Setor", "Criado por", "Prioridade", "Status", "Data"];
+const validStatusFilters: RequestStatus[] = ["pending", "in_separation", "replenished", "cancelled"];
 
 const statusBadgeVariants: Record<RequestStatus, "success" | "warning" | "destructive"> = {
   pending: "warning",
@@ -55,11 +57,15 @@ const priorityBadgeClassNames: Record<string, string> = {
 };
 
 export default function SolicitacoesPage() {
+  const searchParams = useSearchParams();
+  const initialStatus = searchParams.get("status");
   const [requests, setRequests] = useState<ReplenishmentRequest[]>([]);
   const [items, setItems] = useState<ReplenishmentRequestItem[]>([]);
   const [events, setEvents] = useState<RequestStatusEvent[]>([]);
   const [selected, setSelected] = useState<ReplenishmentRequest | null>(null);
-  const [status, setStatus] = useState<RequestStatus | "all">("all");
+  const [status, setStatus] = useState<RequestStatus | "all">(
+    validStatusFilters.includes(initialStatus as RequestStatus) ? (initialStatus as RequestStatus) : "all"
+  );
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
