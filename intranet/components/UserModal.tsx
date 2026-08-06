@@ -2,7 +2,6 @@
 
 import { FormEvent, useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
 import {
   Dialog,
   DialogContent,
@@ -14,6 +13,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { ToggleSwitch } from "@/components/ui/toggle-switch";
 import { roleLabels } from "@/lib/profile";
 import type { Profile, ProfileCreateValues, ProfileUpdateValues, UserRole } from "@/lib/types";
 
@@ -158,13 +158,12 @@ export function UserModal({
           </div>
 
           <div className="mt-6">
-            <Label className="inline-flex items-center gap-3 rounded-lg border border-charcoal/10 px-4 py-3 text-sm font-bold text-graphite">
-              <Checkbox
-                checked={values.active}
-                onCheckedChange={(checked) => setValues((current) => ({ ...current, active: checked === true }))}
-              />
-              Ativo
-            </Label>
+            <ToggleSwitch
+              checked={values.active}
+              label="Ativo"
+              onClick={() => setValues((current) => ({ ...current, active: !current.active }))}
+              tone="lime"
+            />
           </div>
 
           <DialogFooter className="mt-8">

@@ -37,7 +37,7 @@ function ToggleSwitch({
       <span className={label ? trackClassName : "contents"} aria-hidden="true">
         <span
           className={cn(
-            "absolute left-0.5 h-4 w-4 rounded-full bg-graphite transition-transform duration-150",
+            "absolute left-0.5 top-0.5 h-4 w-4 rounded-full bg-graphite transition-transform duration-150",
             checked && "translate-x-4"
           )}
         />

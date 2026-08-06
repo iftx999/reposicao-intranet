@@ -5,9 +5,17 @@ import { useEffect, useState } from "react";
 import { EmpresaModal } from "@/components/EmpresaModal";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { supabase } from "@/lib/supabase";
 import type { Company, CompanyCreateValues } from "@/lib/types";
+
+const primaryButtonClassName =
+  "h-auto rounded-full bg-lime px-5 py-3 text-sm font-semibold text-graphite shadow-[0_16px_38px_rgba(182,232,95,0.2)] transition hover:brightness-95 active:scale-[0.98]";
+
+const badgeClassName = "h-auto px-2.5 py-1 text-[11px] font-semibold";
+
+const companyGridTemplateColumns = "minmax(220px,2fr) minmax(110px,0.8fr) minmax(180px,1fr)";
+
+const companyColumnLabels = ["Nome", "Ativa", "Criada em"];
 
 export default function EmpresasPage() {
   const [companies, setCompanies] = useState<Company[]>([]);
@@ -64,47 +72,70 @@ export default function EmpresasPage() {
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
           <p className="text-xs font-black uppercase tracking-[0.18em] text-muted">Plataforma</p>
-          <h1 className="mt-2 text-3xl font-black text-graphite">Empresas</h1>
+          <h1 className="mt-2 text-3xl font-black text-white">Empresas</h1>
         </div>
-        <Button onClick={() => setModalOpen(true)}>
+        <Button className={primaryButtonClassName} onClick={() => setModalOpen(true)}>
           <Plus className="h-4 w-4" /> Adicionar
         </Button>
       </div>
 
-      {error ? <p className="mt-4 rounded-lg bg-coral/10 p-3 text-sm font-semibold text-coral">{error}</p> : null}
+      {error ? (
+        <p className="mt-4 rounded-[28px] border border-coral/30 bg-coral/10 px-4 py-3 text-sm font-semibold text-coral">
+          {error}
+        </p>
+      ) : null}
 
-      <section className="mt-6 overflow-hidden rounded-lg border border-charcoal/10 bg-white shadow-sm">
-        <Table>
-          <TableHeader>
-            <TableRow className="bg-charcoal hover:bg-charcoal">
-              {["Nome", "Ativa", "Criada em"].map((heading) => (
-                <TableHead className="font-black text-white" key={heading}>{heading}</TableHead>
-              ))}
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {loading ? (
-              <TableRow><TableCell className="text-muted" colSpan={3}>Carregando empresas...</TableCell></TableRow>
-            ) : companies.length === 0 ? (
-              <TableRow><TableCell className="text-muted" colSpan={3}>Nenhuma empresa encontrada.</TableCell></TableRow>
-            ) : (
-              companies.map((company) => (
-                <TableRow className="hover:bg-ice" key={company.id}>
-                  <TableCell className="font-bold text-graphite">{company.name}</TableCell>
-                  <TableCell>
-                    <Badge variant={company.active ? "success" : "destructive"}>
-                      {company.active ? "Ativa" : "Inativa"}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="text-muted">{new Date(company.created_at).toLocaleString("pt-BR")}</TableCell>
-                </TableRow>
-              ))
-            )}
-          </TableBody>
-        </Table>
+      <section className="mt-6 overflow-hidden rounded-[28px] border border-white/[0.08] bg-charcoal shadow-panel">
+        <div
+          className="hidden border-b border-white/[0.06] px-5 py-3 text-[11px] font-bold uppercase tracking-[0.16em] text-muted md:grid md:items-center md:gap-4"
+          style={{ gridTemplateColumns: companyGridTemplateColumns }}
+        >
+          {companyColumnLabels.map((label) => (
+            <div key={label}>{label}</div>
+          ))}
+        </div>
+
+        {loading ? (
+          <p className="px-5 py-4 text-sm text-muted">Carregando empresas...</p>
+        ) : companies.length === 0 ? (
+          <p className="px-5 py-4 text-sm text-muted">Nenhuma empresa encontrada.</p>
+        ) : (
+          companies.map((company) => <CompanyListRow company={company} key={company.id} />)
+        )}
       </section>
 
       {modalOpen ? <EmpresaModal onClose={() => setModalOpen(false)} onCreate={createCompany} /> : null}
     </main>
+  );
+}
+
+function CompanyListRow({ company }: { company: Company }) {
+  return (
+    <div
+      className="border-b border-white/[0.06] px-5 py-4 transition hover:bg-white/[0.04] last:border-b-0 md:grid md:items-center md:gap-4"
+      style={{ gridTemplateColumns: companyGridTemplateColumns }}
+    >
+      <div className="flex min-w-0 items-center gap-4">
+        <div className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-soda/15 text-sm font-bold text-soda">
+          {company.name.slice(0, 2).toUpperCase()}
+        </div>
+        <div className="min-w-0">
+          <p className="truncate text-sm font-semibold text-white">{company.name}</p>
+          <p className="mt-1 text-xs font-semibold uppercase tracking-[0.12em] text-muted md:hidden">Nome</p>
+        </div>
+      </div>
+
+      <div className="mt-4 flex items-center justify-between gap-4 md:mt-0 md:block">
+        <span className="text-xs font-semibold uppercase tracking-[0.12em] text-muted md:hidden">Ativa</span>
+        <Badge className={badgeClassName} variant={company.active ? "success" : "neutral"}>
+          {company.active ? "Ativa" : "Inativa"}
+        </Badge>
+      </div>
+
+      <div className="mt-4 flex items-center justify-between gap-4 md:mt-0 md:block">
+        <span className="text-xs font-semibold uppercase tracking-[0.12em] text-muted md:hidden">Criada em</span>
+        <span className="text-sm text-muted">{new Date(company.created_at).toLocaleString("pt-BR")}</span>
+      </div>
+    </div>
   );
 }
