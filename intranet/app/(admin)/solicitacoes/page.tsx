@@ -206,7 +206,7 @@ export default function SolicitacoesPage() {
 
             <div className="mt-5 grid gap-3 text-sm">
               <Info label="Setor" value={selected.sector_id} />
-              <Info label="Criado por" value={selected.created_by} />
+              <Info label="Criado por" value={selected.created_by || "-"} />
               <InfoBadge label="Prioridade">
                 <PriorityPill priority={selected.priority} />
               </InfoBadge>
@@ -287,7 +287,7 @@ function RequestListRow({ onOpen, request }: { onOpen: () => void; request: Repl
         <span className="mt-1 block text-xs font-semibold uppercase tracking-[0.12em] text-muted md:hidden">ID</span>
       </div>
       <RequestTextCell label="Setor" value={request.sector_id} />
-      <RequestTextCell label="Criado por" value={request.created_by} />
+      <RequestTextCell label="Criado por" value={request.created_by || "-"} />
       <RequestBadgeCell label="Prioridade">
         <PriorityPill priority={request.priority} />
       </RequestBadgeCell>

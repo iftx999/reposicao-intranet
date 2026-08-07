@@ -56,11 +56,12 @@ class BarRepository(private val db: AppDatabase) {
         require(lines.isNotEmpty()) { "Uma solicitação precisa ter pelo menos um item." }
         val now = System.currentTimeMillis()
         val id = UUID.randomUUID().toString()
+        val sectorId = lines.first().product.sectorId
         val request = ReplenishmentRequestEntity(
             id = id,
             restaurantUnitId = "main",
-            sectorId = "bar",
-            createdBy = createdBy.ifBlank { "responsável_bar" },
+            sectorId = sectorId,
+            createdBy = createdBy,
             priority = priority,
             status = RequestStatus.Pending,
             notes = notes,
@@ -105,7 +106,7 @@ class BarRepository(private val db: AppDatabase) {
                 syncState = SyncState.WaitingUpload,
                 syncedAt = null
             )
-            requestDao.upsertEvent(event(id, status, message, user.ifBlank { "responsável_bar" }, now))
+            requestDao.upsertEvent(event(id, status, message, user, now))
         }
     }
 

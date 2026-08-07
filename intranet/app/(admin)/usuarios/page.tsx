@@ -10,7 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { roleLabels } from "@/lib/profile";
 import { supabase } from "@/lib/supabase";
-import type { Profile, ProfileCreateValues, ProfileUpdateValues, UserRole } from "@/lib/types";
+import type { Profile, ProfileCreateValues, ProfileUpdateValues, Sector, UserRole } from "@/lib/types";
 
 type ActiveFilter = "all" | "active" | "inactive";
 type RoleFilter = "all" | UserRole;
@@ -38,6 +38,7 @@ const userColumnLabels = ["Nome", "Email", "Role", "Setor", "Ativo", "Criado em"
 
 export default function UsuariosPage() {
   const [profiles, setProfiles] = useState<Profile[]>([]);
+  const [sectors, setSectors] = useState<Sector[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [role, setRole] = useState<RoleFilter>("all");
@@ -60,8 +61,14 @@ export default function UsuariosPage() {
     setLoading(false);
   }
 
+  async function loadSectors() {
+    const { data } = await supabase.from("sectors").select("*").order("name");
+    setSectors((data || []) as Sector[]);
+  }
+
   useEffect(() => {
     void loadProfiles();
+    void loadSectors();
   }, []);
 
   const filtered = useMemo(
@@ -79,6 +86,7 @@ export default function UsuariosPage() {
       }),
     [active, profiles, query, role]
   );
+  const sectorsById = useMemo(() => new Map(sectors.map((sector) => [sector.id, sector.name])), [sectors]);
 
   async function createProfile(values: ProfileCreateValues) {
     setError("");
@@ -243,6 +251,7 @@ export default function UsuariosPage() {
                 setModalOpen(true);
               }}
               profile={profile}
+              sectorName={profile.sector_id ? sectorsById.get(profile.sector_id) || profile.sector_id : "-"}
             />
           ))
         )}
@@ -266,11 +275,13 @@ export default function UsuariosPage() {
 function UserListRow({
   onDeactivate,
   onEdit,
-  profile
+  profile,
+  sectorName
 }: {
   onDeactivate: () => void;
   onEdit: () => void;
   profile: Profile;
+  sectorName: string;
 }) {
   return (
     <div
@@ -293,7 +304,7 @@ function UserListRow({
           {roleLabels[profile.role]}
         </Badge>
       </UserBadgeCell>
-      <UserTextCell label="Setor" value={profile.sector_id || "-"} />
+      <UserTextCell label="Setor" value={sectorName} />
       <UserBadgeCell label="Ativo">
         <Badge className={badgeClassName} variant={profile.active ? "success" : "neutral"}>
           {profile.active ? "Ativo" : "Inativo"}

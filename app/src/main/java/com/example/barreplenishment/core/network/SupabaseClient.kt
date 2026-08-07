@@ -65,8 +65,7 @@ class SupabaseClient {
             null
         } else {
             val sectorId = profile.sectorId?.takeIf { it.isNotBlank() } ?: return ProductDownload(emptyList(), "operator:no_sector")
-            val resolvedSectorId = resolveProductSectorId(sectorId) ?: return ProductDownload(emptyList(), "operator:unresolved_sector")
-            "sector_id=eq.${urlEncode(resolvedSectorId)}"
+            "sector_id=eq.${urlEncode(sectorId)}"
         }
         val scopeKey = productSectorFilter ?: "company_all"
         val filter = productSectorFilter?.let { "&$it" } ?: ""
@@ -202,29 +201,6 @@ class SupabaseClient {
         }
     }
 
-    private fun resolveProductSectorId(profileSectorId: String): String? {
-        if (UUID_REGEX.matches(profileSectorId)) return profileSectorId
-        val url = URL("$baseUrl/rest/v1/sectors?select=id&name=eq.${urlEncode(profileSectorId)}&limit=1")
-        val connection = (url.openConnection() as HttpURLConnection).apply {
-            requestMethod = "GET"
-            connectTimeout = 8000
-            readTimeout = 8000
-            setRequestProperty("apikey", anonKey)
-            setRequestProperty("Authorization", "Bearer ${accessToken ?: anonKey}")
-        }
-        return try {
-            val code = connection.responseCode
-            if (code !in 200..299) return null
-            val text = BufferedReader(InputStreamReader(connection.inputStream)).use { it.readText() }
-            val array = JSONArray(text)
-            if (array.length() == 0) null else array.getJSONObject(0).getString("id")
-        } catch (_: Exception) {
-            null
-        } finally {
-            connection.disconnect()
-        }
-    }
-
     private fun urlEncode(value: String): String = URLEncoder.encode(value, StandardCharsets.UTF_8.name())
 
     private fun refreshAccessToken(): Boolean {
@@ -269,7 +245,7 @@ class SupabaseClient {
             .put("id", request.id)
             .put("restaurant_unit_id", request.restaurantUnitId)
             .put("sector_id", request.sectorId)
-            .put("created_by", request.createdBy)
+            .put("created_by", request.createdBy.takeIf { it.isNotBlank() } ?: JSONObject.NULL)
             .put("priority", request.priority)
             .put("status", request.status)
             .put("notes", request.notes)
@@ -302,7 +278,7 @@ class SupabaseClient {
                     .put("request_id", event.requestId)
                     .put("status", event.status)
                     .put("message", event.message)
-                    .put("user_id", event.userId)
+                    .put("user_id", event.userId.takeIf { it.isNotBlank() } ?: JSONObject.NULL)
                     .put("created_at", isoTimestamp(event.createdAt))
             )
         }
@@ -334,9 +310,5 @@ class SupabaseClient {
         } finally {
             connection.disconnect()
         }
-    }
-
-    private companion object {
-        val UUID_REGEX = Regex("^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$")
     }
 }

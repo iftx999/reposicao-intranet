@@ -92,6 +92,7 @@ fun BarApp() {
 
     var loggedIn by remember { mutableStateOf(prefs.getBoolean("logged_in", false)) }
     var user by remember { mutableStateOf(prefs.getString("user_name", "") ?: "") }
+    var userId by remember { mutableStateOf(prefs.getString("user_id", "") ?: "") }
     var password by remember { mutableStateOf("") }
     var authError by remember { mutableStateOf("") }
     var authLoading by remember { mutableStateOf(false) }
@@ -159,10 +160,12 @@ fun BarApp() {
                                     prefs.edit()
                                         .putBoolean("logged_in", true)
                                         .putString("user_name", result.userEmail)
+                                        .putString("user_id", result.userId)
                                         .putString("access_token", result.accessToken)
                                         .putString("refresh_token", result.refreshToken)
                                         .apply()
                                     user = result.userEmail
+                                    userId = result.userId
                                     loggedIn = true
                                 }
                                 is AuthResult.Failure -> {
@@ -194,6 +197,7 @@ fun BarApp() {
                     favorites = emptyList()
                     cart.clear()
                     scope.launch { withContext(Dispatchers.IO) { repository.clearProducts() } }
+                    userId = ""
                     loggedIn = false
                 }
             )
@@ -219,7 +223,7 @@ fun BarApp() {
                             details = selected,
                             onStatus = { status: String ->
                                 scope.launch {
-                                    withContext(Dispatchers.IO) { repository.updateStatus(selected.request.id, status, user, isOnline(context)); syncManager.syncWaitingUploads() }
+                                    withContext(Dispatchers.IO) { repository.updateStatus(selected.request.id, status, userId, isOnline(context)); syncManager.syncWaitingUploads() }
                                     selectedRequestId = null
                                     tab = 2
                                     refresh()
@@ -238,7 +242,7 @@ fun BarApp() {
                             onSubmit = {
                                 if (lineItems.isEmpty()) toast(context, "Selecione pelo menos um item.") else scope.launch {
                                     withContext(Dispatchers.IO) {
-                                        repository.createRequest(user, priority.lowercase(), notes, lineItems, isOnline(context))
+                                        repository.createRequest(userId, priority.lowercase(), notes, lineItems, isOnline(context))
                                         syncManager.syncWaitingUploads()
                                     }
                                     cart.clear(); notes = ""; priority = "Normal"; reviewing = false; tab = 2; requestFilter = RequestStatus.Pending; refresh()

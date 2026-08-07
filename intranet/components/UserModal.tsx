@@ -15,7 +15,8 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ToggleSwitch } from "@/components/ui/toggle-switch";
 import { roleLabels } from "@/lib/profile";
-import type { Profile, ProfileCreateValues, ProfileUpdateValues, UserRole } from "@/lib/types";
+import { supabase } from "@/lib/supabase";
+import type { Profile, ProfileCreateValues, ProfileUpdateValues, Sector, UserRole } from "@/lib/types";
 
 const roleOptions: UserRole[] = ["admin", "gestor", "operador"];
 
@@ -40,7 +41,17 @@ export function UserModal({
   onUpdate: (values: ProfileUpdateValues) => Promise<void>;
 }) {
   const [values, setValues] = useState<ProfileCreateValues>(emptyCreateValues);
+  const [sectors, setSectors] = useState<Sector[]>([]);
   const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    supabase
+      .from("sectors")
+      .select("*")
+      .eq("active", true)
+      .order("name")
+      .then(({ data }) => setSectors((data || []) as Sector[]));
+  }, []);
 
   useEffect(() => {
     setValues(
@@ -148,12 +159,24 @@ export function UserModal({
             </div>
             <div>
               <Label>Setor</Label>
-              <Input
-                className="mt-2"
-                onChange={(event) => setValues((current) => ({ ...current, sector_id: event.target.value }))}
-                placeholder="BAR"
-                value={values.sector_id || ""}
-              />
+              <Select
+                onValueChange={(value) =>
+                  setValues((current) => ({ ...current, sector_id: value === "__none__" ? null : value }))
+                }
+                value={values.sector_id || "__none__"}
+              >
+                <SelectTrigger className="mt-2 w-full">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="__none__">Sem setor</SelectItem>
+                  {sectors.map((sector) => (
+                    <SelectItem key={sector.id} value={sector.id}>
+                      {sector.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
           </div>
 

@@ -19,7 +19,7 @@ export type ReplenishmentRequest = {
   company_id: string;
   restaurant_unit_id: string;
   sector_id: string;
-  created_by: string;
+  created_by: string | null;
   priority: Priority | string;
   status: RequestStatus;
   notes: string | null;
