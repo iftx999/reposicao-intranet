@@ -60,8 +60,8 @@ function SelectTrigger({
 function SelectContent({
   className,
   children,
-  position = "item-aligned",
-  align = "center",
+  position = "popper",
+  align = "start",
   ...props
 }: React.ComponentProps<typeof SelectPrimitive.Content>) {
   return (
@@ -69,7 +69,7 @@ function SelectContent({
       <SelectPrimitive.Content
         data-slot="select-content"
         data-align-trigger={position === "item-aligned"}
-        className={cn("relative z-50 max-h-[var(--radix-select-content-available-height)] min-w-36 origin-[var(--radix-select-content-transform-origin)] overflow-x-hidden overflow-y-auto rounded-[28px] border border-white/[0.08] bg-popover p-1 text-popover-foreground shadow-dialog ring-1 ring-foreground/10 duration-100 data-[align-trigger=true]:animate-none data-[state=open]:animate-select-content-in data-[state=closed]:animate-select-content-out", position ==="popper"&&"data-[side=bottom]:translate-y-1 data-[side=left]:-translate-x-1 data-[side=right]:translate-x-1 data-[side=top]:-translate-y-1", className )}
+        className={cn("relative z-50 max-h-[min(20rem,var(--radix-select-content-available-height))] min-w-36 origin-[var(--radix-select-content-transform-origin)] overflow-x-hidden overflow-y-auto rounded-[28px] border border-white/[0.08] bg-popover p-1 text-popover-foreground shadow-dialog ring-1 ring-foreground/10 duration-100 data-[align-trigger=true]:animate-none data-[state=open]:animate-select-content-in data-[state=closed]:animate-select-content-out", position ==="popper"&&"data-[side=bottom]:translate-y-1 data-[side=left]:-translate-x-1 data-[side=right]:translate-x-1 data-[side=top]:-translate-y-1", className )}
         position={position}
         align={align}
         {...props}
@@ -78,8 +78,9 @@ function SelectContent({
         <SelectPrimitive.Viewport
           data-position={position}
           className={cn(
-            "data-[position=popper]:h-[var(--radix-select-trigger-height)] data-[position=popper]:w-full data-[position=popper]:min-w-[var(--radix-select-trigger-width)]",
-            position === "popper" && ""
+            // Sem h-[--radix-select-trigger-height] aqui: no modo popper isso fixa
+            // a altura do viewport na altura do campo e colapsa a lista.
+            "data-[position=popper]:w-full data-[position=popper]:min-w-[var(--radix-select-trigger-width)]"
           )}
         >
           {children}

@@ -27,10 +27,24 @@ const dangerButtonClassName =
 
 const badgeClassName = "h-auto px-2.5 py-1 text-[11px] font-semibold";
 
+// Minimos enxutos para a tabela caber sem rolagem horizontal: 566px de colunas
+// + 64 de gaps + 40 de padding = 670px, abaixo dos 720 disponiveis no menor
+// breakpoint em que o grid aparece. Setor e "Criado por" truncam com reticencias;
+// as colunas de badge tem folga para "Em separacao" e "urgente", que nao truncam.
 const requestGridTemplateColumns =
-  "minmax(150px,1fr) minmax(170px,1.1fr) minmax(110px,0.8fr) minmax(130px,0.9fr) minmax(170px,1fr)";
+  "minmax(80px,0.6fr) minmax(130px,1.5fr) minmax(96px,0.7fr) minmax(120px,0.9fr) minmax(140px,1fr)";
 
 const requestColumnLabels = ["Setor", "Criado por", "Prioridade", "Status", "Data"];
+
+// Sem segundos: "05/08/2026, 16:31" em vez de "05/08/2026, 16:31:27". Economiza
+// ~30px na coluna mais larga e o segundo exato nao serve para nada nesta lista.
+const listDateFormat = new Intl.DateTimeFormat("pt-BR", {
+  day: "2-digit",
+  month: "2-digit",
+  year: "numeric",
+  hour: "2-digit",
+  minute: "2-digit"
+});
 const validStatusFilters: RequestStatus[] = ["pending", "in_separation", "replenished", "cancelled"];
 
 const statusBadgeVariants: Record<RequestStatus, "success" | "warning" | "destructive"> = {
@@ -142,7 +156,7 @@ export default function SolicitacoesPage() {
 
   return (
     // minmax(0,1fr) e obrigatorio: 1fr tem min-width auto e nao encolhe abaixo
-    // do minimo da tabela (840px), o que empurrava o aside para fora da tela.
+    // do minimo da tabela (670px), o que empurrava o aside para fora da tela.
     <main className="mx-auto grid min-h-screen max-w-7xl gap-6 bg-graphite px-6 py-8 xl:grid-cols-[minmax(0,1fr)_420px]">
       <section>
         <div className="flex flex-wrap items-end justify-between gap-4">
@@ -173,9 +187,9 @@ export default function SolicitacoesPage() {
           </p>
         ) : null}
 
-        <section className="mt-6 overflow-x-auto rounded-[28px] border border-white/[0.08] bg-charcoal shadow-panel">
+        <section className="mt-6 overflow-hidden rounded-[28px] border border-white/[0.08] bg-charcoal shadow-panel">
           <div
-            className="hidden border-b border-white/[0.06] px-5 py-3 text-[11px] font-bold uppercase tracking-[0.16em] text-muted md:grid md:min-w-[840px] md:items-center md:gap-4"
+            className="hidden border-b border-white/[0.06] px-5 py-3 text-[11px] font-bold uppercase tracking-[0.16em] text-muted md:grid md:min-w-[670px] md:items-center md:gap-4"
             style={{ gridTemplateColumns: requestGridTemplateColumns }}
           >
             {requestColumnLabels.map((label) => (
@@ -279,7 +293,7 @@ export default function SolicitacoesPage() {
 function RequestListRow({ onOpen, request }: { onOpen: () => void; request: ReplenishmentRequest }) {
   return (
     <button
-      className="block w-full cursor-pointer border-b border-white/[0.06] px-5 py-4 text-left transition hover:bg-white/[0.04] last:border-b-0 md:grid md:min-w-[840px] md:items-center md:gap-4"
+      className="block w-full cursor-pointer border-b border-white/[0.06] px-5 py-4 text-left transition hover:bg-white/[0.04] last:border-b-0 md:grid md:min-w-[670px] md:items-center md:gap-4"
       onClick={onOpen}
       style={{ gridTemplateColumns: requestGridTemplateColumns }}
       type="button"
@@ -292,7 +306,7 @@ function RequestListRow({ onOpen, request }: { onOpen: () => void; request: Repl
       <RequestBadgeCell label="Status">
         <StatusPill status={request.status} />
       </RequestBadgeCell>
-      <RequestTextCell label="Data" value={new Date(request.created_at).toLocaleString("pt-BR")} />
+      <RequestTextCell label="Data" value={listDateFormat.format(new Date(request.created_at))} />
     </button>
   );
 }
