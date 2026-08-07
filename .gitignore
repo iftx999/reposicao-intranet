@@ -21,3 +21,7 @@ intranet/*.tsbuildinfo
 # OS
 .DS_Store
 Thumbs.db
+
+# Tooling caches
+.npm-cache/
+intranet/supabase/.temp/

@@ -43,7 +43,7 @@ export async function POST(request: NextRequest) {
 
   const { data: requesterProfile, error: profileError } = await supabase
     .from("profiles")
-    .select("role, active")
+    .select("role, active, company_id")
     .eq("id", user.id)
     .single();
 
@@ -74,7 +74,9 @@ export async function POST(request: NextRequest) {
     user_metadata: {
       full_name: fullName,
       role,
-      sector_id: sectorId
+      sector_id: sectorId,
+      company_id: requesterProfile.company_id,
+      is_super_admin: false
     }
   });
 
@@ -88,7 +90,9 @@ export async function POST(request: NextRequest) {
     email,
     role,
     sector_id: sectorId,
-    active
+    active,
+    company_id: requesterProfile.company_id,
+    is_super_admin: false
   };
 
   const { data, error: profileInsertError } = await supabase

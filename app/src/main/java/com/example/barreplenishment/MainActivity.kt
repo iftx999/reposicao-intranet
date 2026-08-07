@@ -39,6 +39,7 @@ import com.example.barreplenishment.core.data.RequestWithDetails
 import com.example.barreplenishment.core.database.AppDatabase
 import com.example.barreplenishment.core.database.ProductEntity
 import com.example.barreplenishment.core.network.SupabaseClient
+import com.example.barreplenishment.core.network.AuthResult
 import com.example.barreplenishment.core.sync.SyncManager
 import com.example.barreplenishment.core.ui.BarTheme
 import com.example.barreplenishment.core.ui.BottomTabs
@@ -74,12 +75,27 @@ fun BarApp() {
     val prefs = remember { context.getSharedPreferences("session", Context.MODE_PRIVATE) }
     val db = remember { Room.databaseBuilder(context, AppDatabase::class.java, "bar-replenishment.db").build() }
     val repository = remember { BarRepository(db) }
-    val syncManager = remember { SyncManager(repository, SupabaseClient()) }
+    val supabaseClient = remember {
+        SupabaseClient().apply {
+            val savedAccess = prefs.getString("access_token", null)
+            val savedRefresh = prefs.getString("refresh_token", null)
+            if (savedAccess != null && savedRefresh != null) {
+                restoreSession(savedAccess, savedRefresh)
+            }
+            onSessionUpdated = { access, refresh ->
+                prefs.edit().putString("access_token", access).putString("refresh_token", refresh).apply()
+            }
+        }
+    }
+    val syncManager = remember { SyncManager(repository, supabaseClient) }
     val scope = rememberCoroutineScope()
 
     var loggedIn by remember { mutableStateOf(prefs.getBoolean("logged_in", false)) }
     var user by remember { mutableStateOf(prefs.getString("user_name", "") ?: "") }
+    var userId by remember { mutableStateOf(prefs.getString("user_id", "") ?: "") }
     var password by remember { mutableStateOf("") }
+    var authError by remember { mutableStateOf("") }
+    var authLoading by remember { mutableStateOf(false) }
     var tab by remember { mutableIntStateOf(0) }
     var reviewing by remember { mutableStateOf(false) }
     var selectedRequestId by remember { mutableStateOf<String?>(null) }
@@ -103,6 +119,7 @@ fun BarApp() {
             try {
                 withContext(Dispatchers.IO) {
                     repository.seedIfNeeded()
+                    syncManager.downloadProducts()
                     syncManager.syncWaitingUploads()
                     products = repository.products(category, search)
                     favorites = repository.favorites()
@@ -126,11 +143,37 @@ fun BarApp() {
                 password = password,
                 onUser = { user = it },
                 onPassword = { password = it },
+                error = authError,
+                loading = authLoading,
                 onLogin = {
-                    if (user.isBlank() || password.isBlank()) toast(context, "Preencha usuario e senha.")
-                    else {
-                        prefs.edit().putBoolean("logged_in", true).putString("user_name", user).apply()
-                        loggedIn = true
+                    if (user.isBlank() || password.isBlank()) {
+                        toast(context, "Preencha usuario e senha.")
+                    } else {
+                        authLoading = true
+                        authError = ""
+                        scope.launch {
+                            val result = withContext(Dispatchers.IO) { supabaseClient.signIn(user, password) }
+                            authLoading = false
+                            when (result) {
+                                is AuthResult.Success -> {
+                                    withContext(Dispatchers.IO) { repository.clearProducts() }
+                                    prefs.edit()
+                                        .putBoolean("logged_in", true)
+                                        .putString("user_name", result.userEmail)
+                                        .putString("user_id", result.userId)
+                                        .putString("access_token", result.accessToken)
+                                        .putString("refresh_token", result.refreshToken)
+                                        .apply()
+                                    user = result.userEmail
+                                    userId = result.userId
+                                    loggedIn = true
+                                }
+                                is AuthResult.Failure -> {
+                                    authError = result.message
+                                    toast(context, result.message)
+                                }
+                            }
+                        }
                     }
                 }
             )
@@ -150,6 +193,11 @@ fun BarApp() {
                 subtitle = "Turno atual - $pending pendentes",
                 onLogout = {
                     prefs.edit().clear().apply()
+                    products = emptyList()
+                    favorites = emptyList()
+                    cart.clear()
+                    scope.launch { withContext(Dispatchers.IO) { repository.clearProducts() } }
+                    userId = ""
                     loggedIn = false
                 }
             )
@@ -175,7 +223,7 @@ fun BarApp() {
                             details = selected,
                             onStatus = { status: String ->
                                 scope.launch {
-                                    withContext(Dispatchers.IO) { repository.updateStatus(selected.request.id, status, user, isOnline(context)); syncManager.syncWaitingUploads() }
+                                    withContext(Dispatchers.IO) { repository.updateStatus(selected.request.id, status, userId, isOnline(context)); syncManager.syncWaitingUploads() }
                                     selectedRequestId = null
                                     tab = 2
                                     refresh()
@@ -194,7 +242,7 @@ fun BarApp() {
                             onSubmit = {
                                 if (lineItems.isEmpty()) toast(context, "Selecione pelo menos um item.") else scope.launch {
                                     withContext(Dispatchers.IO) {
-                                        repository.createRequest(user, priority.lowercase(), notes, lineItems, isOnline(context))
+                                        repository.createRequest(userId, priority.lowercase(), notes, lineItems, isOnline(context))
                                         syncManager.syncWaitingUploads()
                                     }
                                     cart.clear(); notes = ""; priority = "Normal"; reviewing = false; tab = 2; requestFilter = RequestStatus.Pending; refresh()

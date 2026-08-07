@@ -75,7 +75,9 @@ fun LoginScreen(
     password: String,
     onUser: (String) -> Unit,
     onPassword: (String) -> Unit,
-    onLogin: () -> Unit
+    onLogin: () -> Unit,
+    error: String = "",
+    loading: Boolean = false
 ) {
     Column(
         modifier = Modifier
@@ -161,13 +163,19 @@ fun LoginScreen(
                         visualTransformation = PasswordVisualTransformation(),
                         colors = inputColors()
                     )
+                    if (error.isNotBlank()) {
+                        Gap(10)
+                        Text(error, color = Coral, style = MaterialTheme.typography.bodyMedium)
+                    }
                     Gap(18)
-                    PrimaryButton("Entrar no BAR", Lime, Graphite, onLogin)
+                    PrimaryButton(if (loading) "Entrando..." else "Entrar no BAR", Lime, Graphite, onLogin)
                 }
             }
         }
     }
 }
+
+private fun requestCode(id: String): String = "BAR-" + id.takeLast(7).uppercase()
 
 @Composable
 private fun LoginSignal(title: String, body: String, color: Color, icon: androidx.compose.ui.graphics.vector.ImageVector, modifier: Modifier = Modifier) {
@@ -377,7 +385,7 @@ fun DetailScreen(details: RequestWithDetails, onStatus: (String) -> Unit, onBack
             IconButton(onClick = onBack) {
                 Icon(Icons.Filled.ArrowBack, contentDescription = "Voltar", tint = Graphite)
             }
-            Text("Detalhe ${details.request.id}", style = MaterialTheme.typography.titleLarge, color = Graphite)
+            Text("Detalhe ${requestCode(details.request.id)}", style = MaterialTheme.typography.titleLarge, color = Graphite)
         }
         RequestCard(details, onOpen = {})
         Gap(14)
@@ -495,10 +503,10 @@ private fun Step(icon: androidx.compose.ui.graphics.vector.ImageVector, descript
 @Composable
 private fun RequestCard(details: RequestWithDetails, onOpen: (String) -> Unit) {
     AppCard {
-        Column(Modifier.clickable(onClickLabel = "Abrir solicitação ${details.request.id}") { onOpen(details.request.id) }) {
+        Column(Modifier.clickable(onClickLabel = "Abrir solicitação ${requestCode(details.request.id)}") { onOpen(details.request.id) }) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Column(Modifier.weight(1f)) {
-                    Text(details.request.id, style = MaterialTheme.typography.titleMedium, color = Graphite)
+                    Text(requestCode(details.request.id), style = MaterialTheme.typography.titleMedium, color = Graphite)
                     Text("${date(details.request.createdAt)} - ${priorityLabel(details.request.priority)}", color = Muted, style = MaterialTheme.typography.bodyMedium)
                 }
                 StatusPill(details.request.status)

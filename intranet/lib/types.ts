@@ -3,19 +3,23 @@ export type Priority = "baixa" | "normal" | "alta" | "urgente";
 
 export type Product = {
   id: string;
+  company_id: string;
   sector_id: string;
   name: string;
   category: string;
   unit: string;
   active: boolean;
   favorite: boolean;
+  quantity: number;
+  min_quantity: number;
 };
 
 export type ReplenishmentRequest = {
   id: string;
+  company_id: string;
   restaurant_unit_id: string;
   sector_id: string;
-  created_by: string;
+  created_by: string | null;
   priority: Priority | string;
   status: RequestStatus;
   notes: string | null;
@@ -43,7 +47,35 @@ export type RequestStatusEvent = {
   created_at: string;
 };
 
-export type ProductFormValues = Omit<Product, "id">;
+export type ProductFormValues = Omit<Product, "id" | "company_id" | "quantity">;
+
+export type StockMovementType = "entrada" | "saida" | "ajuste";
+export type StockMovementSource = "manual" | "replenishment" | "inventory";
+
+export type StockMovement = {
+  id: string;
+  company_id: string;
+  product_id: string;
+  movement_type: StockMovementType;
+  delta: number;
+  balance_after: number;
+  source: StockMovementSource;
+  reference_id: string | null;
+  reason: string | null;
+  created_by: string | null;
+  created_at: string;
+};
+
+export type StockMovementDaily = {
+  company_id: string;
+  product_id: string;
+  sector_id: string;
+  dia: string;
+  movement_type: StockMovementType;
+  source: StockMovementSource;
+  total_delta: number;
+  qtd_movimentos: number;
+};
 
 export type UserRole = "admin" | "gestor" | "operador";
 
@@ -55,6 +87,8 @@ export type Profile = {
   sector_id: string | null;
   active: boolean;
   created_at: string;
+  company_id: string | null;
+  is_super_admin: boolean;
 };
 
 export type ProfileCreateValues = {
@@ -67,3 +101,32 @@ export type ProfileCreateValues = {
 };
 
 export type ProfileUpdateValues = Pick<Profile, "full_name" | "role" | "sector_id" | "active">;
+
+export type Company = {
+  id: string;
+  name: string;
+  active: boolean;
+  created_at: string;
+};
+
+export type CompanyCreateValues = {
+  company_name: string;
+  admin_full_name: string;
+  admin_email: string;
+  admin_password: string;
+};
+
+export type Sector = {
+  id: string;
+  company_id: string;
+  name: string;
+  active: boolean;
+  created_at: string;
+};
+
+export type SectorCreateValues = {
+  name: string;
+  active: boolean;
+};
+
+export type SectorUpdateValues = Pick<Sector, "name" | "active">;

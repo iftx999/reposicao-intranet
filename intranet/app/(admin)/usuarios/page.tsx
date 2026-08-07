@@ -1,17 +1,44 @@
 "use client";
 
 import { Edit3, Plus, Search, UserX, XCircle } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { type ReactNode, useEffect, useMemo, useState } from "react";
 import { UserModal } from "@/components/UserModal";
-import { roleClasses, roleLabels } from "@/lib/profile";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { roleLabels } from "@/lib/profile";
 import { supabase } from "@/lib/supabase";
-import type { Profile, ProfileCreateValues, ProfileUpdateValues, UserRole } from "@/lib/types";
+import type { Profile, ProfileCreateValues, ProfileUpdateValues, Sector, UserRole } from "@/lib/types";
 
 type ActiveFilter = "all" | "active" | "inactive";
 type RoleFilter = "all" | UserRole;
 
+const fieldClassName =
+  "mt-2 h-auto w-full rounded-full border border-white/10 bg-graphite px-4 py-2.5 text-sm text-ice outline-none placeholder:text-subtle transition focus-visible:border-soda/60 focus-visible:ring-2 focus-visible:ring-soda/25";
+
+const selectContentClassName =
+  "rounded-[28px] border border-white/[0.08] bg-charcoal p-2 text-ice shadow-dialog ring-0";
+
+const selectItemClassName = "rounded-full px-3 py-2 text-sm text-ice focus:bg-white/10 focus:text-white";
+
+const primaryButtonClassName =
+  "h-auto rounded-full bg-lime px-5 py-3 text-sm font-semibold text-graphite shadow-[0_16px_38px_rgba(182,232,95,0.2)] transition hover:brightness-95 active:scale-[0.98]";
+
+const secondaryButtonClassName =
+  "h-auto rounded-full border border-white/10 bg-white/5 px-4 py-2.5 text-sm font-semibold text-ice transition hover:bg-white/10";
+
+const badgeClassName = "h-auto px-2.5 py-1 text-[11px] font-semibold";
+
+const userGridTemplateColumns =
+  "minmax(220px,1.4fr) minmax(220px,1.5fr) minmax(110px,0.75fr) minmax(120px,0.85fr) minmax(90px,0.65fr) minmax(150px,1fr) minmax(84px,0.6fr)";
+
+const userColumnLabels = ["Nome", "Email", "Role", "Setor", "Ativo", "Criado em", "Ações"];
+
 export default function UsuariosPage() {
   const [profiles, setProfiles] = useState<Profile[]>([]);
+  const [sectors, setSectors] = useState<Sector[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [role, setRole] = useState<RoleFilter>("all");
@@ -34,8 +61,14 @@ export default function UsuariosPage() {
     setLoading(false);
   }
 
+  async function loadSectors() {
+    const { data } = await supabase.from("sectors").select("*").order("name");
+    setSectors((data || []) as Sector[]);
+  }
+
   useEffect(() => {
     void loadProfiles();
+    void loadSectors();
   }, []);
 
   const filtered = useMemo(
@@ -53,6 +86,7 @@ export default function UsuariosPage() {
       }),
     [active, profiles, query, role]
   );
+  const sectorsById = useMemo(() => new Map(sectors.map((sector) => [sector.id, sector.name])), [sectors]);
 
   async function createProfile(values: ProfileCreateValues) {
     setError("");
@@ -115,143 +149,112 @@ export default function UsuariosPage() {
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
           <p className="text-xs font-black uppercase tracking-[0.18em] text-muted">Administrativo</p>
-          <h1 className="mt-2 text-3xl font-black text-graphite">Cadastro de Usuários</h1>
+          <h1 className="mt-2 text-3xl font-black text-white">Cadastro de Usuários</h1>
         </div>
-        <button
-          className="focus-ring inline-flex items-center gap-2 rounded-lg bg-graphite px-4 py-3 text-sm font-black text-white"
+        <Button
+          className={primaryButtonClassName}
           onClick={() => {
             setEditing(null);
             setModalOpen(true);
           }}
-          type="button"
         >
           <Plus className="h-4 w-4" /> Adicionar
-        </button>
+        </Button>
       </div>
 
-      <section className="mt-6 rounded-lg border border-charcoal/10 bg-white p-5 shadow-sm">
+      <section className="mt-6 rounded-[28px] border border-white/[0.08] bg-charcoal p-5 shadow-panel">
         <div className="grid gap-4 md:grid-cols-3">
           <label className="block">
-            <span className="text-sm font-bold text-graphite">Buscar</span>
-            <span className="mt-2 flex h-11 items-center gap-3 rounded-lg border border-charcoal/10 px-3 focus-within:border-soda">
+            <span className="text-sm font-bold text-muted">Buscar</span>
+            <span className="mt-2 flex h-auto w-full items-center gap-3 rounded-full border border-white/10 bg-graphite px-4 py-2.5 text-sm text-ice transition focus-within:border-soda/60 focus-within:ring-2 focus-within:ring-soda/25">
               <Search className="h-4 w-4 text-muted" />
-              <input
-                className="h-full flex-1 bg-transparent text-sm outline-none"
+              <Input
+                className="h-auto flex-1 border-0 bg-transparent p-0 text-sm text-ice shadow-none outline-none placeholder:text-subtle focus-visible:ring-0"
                 onChange={(event) => setQuery(event.target.value)}
                 placeholder="Nome ou email"
                 value={query}
               />
             </span>
           </label>
-          <label className="block">
-            <span className="text-sm font-bold text-graphite">Role</span>
-            <select
-              className="mt-2 h-11 w-full rounded-lg border border-charcoal/10 px-3 outline-none focus:border-soda"
-              onChange={(event) => setRole(event.target.value as RoleFilter)}
-              value={role}
-            >
-              <option value="all">Todos</option>
-              <option value="admin">Admin</option>
-              <option value="gestor">Gestor</option>
-              <option value="operador">Operador</option>
-            </select>
-          </label>
-          <label className="block">
-            <span className="text-sm font-bold text-graphite">Ativo/Inativo</span>
-            <select
-              className="mt-2 h-11 w-full rounded-lg border border-charcoal/10 px-3 outline-none focus:border-soda"
-              onChange={(event) => setActive(event.target.value as ActiveFilter)}
-              value={active}
-            >
-              <option value="all">Todos</option>
-              <option value="active">Ativos</option>
-              <option value="inactive">Inativos</option>
-            </select>
-          </label>
+          <div>
+            <Label className="text-sm font-bold text-muted">Role</Label>
+            <Select onValueChange={(value) => setRole(value as RoleFilter)} value={role}>
+              <SelectTrigger className={fieldClassName}>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent className={selectContentClassName}>
+                <SelectItem className={selectItemClassName} value="all">Todos</SelectItem>
+                <SelectItem className={selectItemClassName} value="admin">Admin</SelectItem>
+                <SelectItem className={selectItemClassName} value="gestor">Gestor</SelectItem>
+                <SelectItem className={selectItemClassName} value="operador">Operador</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <div>
+            <Label className="text-sm font-bold text-muted">Ativo/Inativo</Label>
+            <Select onValueChange={(value) => setActive(value as ActiveFilter)} value={active}>
+              <SelectTrigger className={fieldClassName}>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent className={selectContentClassName}>
+                <SelectItem className={selectItemClassName} value="all">Todos</SelectItem>
+                <SelectItem className={selectItemClassName} value="active">Ativos</SelectItem>
+                <SelectItem className={selectItemClassName} value="inactive">Inativos</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
         </div>
         <div className="mt-4">
-          <button
-            className="focus-ring inline-flex items-center gap-2 rounded-lg border border-charcoal/10 px-4 py-2 text-sm font-black text-muted"
+          <Button
+            className={secondaryButtonClassName}
             onClick={() => {
               setQuery("");
               setRole("all");
               setActive("all");
             }}
-            type="button"
+            variant="outline"
           >
             <XCircle className="h-4 w-4" /> Limpar
-          </button>
+          </Button>
         </div>
       </section>
 
-      {error ? <p className="mt-4 rounded-lg bg-coral/10 p-3 text-sm font-semibold text-coral">{error}</p> : null}
+      {error ? (
+        <p className="mt-4 rounded-[28px] border border-coral/30 bg-coral/10 px-4 py-3 text-sm font-semibold text-coral">
+          {error}
+        </p>
+      ) : null}
 
-      <section className="mt-6 overflow-hidden rounded-lg border border-charcoal/10 bg-white shadow-sm">
-        <table className="w-full min-w-[920px] border-collapse text-left text-sm">
-          <thead className="bg-charcoal text-white">
-            <tr>
-              {["Nome", "Email", "Role", "Setor", "Ativo", "Criado em", "Ações"].map((heading) => (
-                <th className="px-4 py-4 font-black" key={heading}>
-                  {heading}
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {loading ? (
-              <tr>
-                <td className="px-4 py-8 text-muted" colSpan={7}>Carregando usuários...</td>
-              </tr>
-            ) : filtered.length === 0 ? (
-              <tr>
-                <td className="px-4 py-8 text-muted" colSpan={7}>Nenhum usuário encontrado.</td>
-              </tr>
-            ) : (
-              filtered.map((profile) => (
-                <tr className="border-t border-charcoal/10 hover:bg-ice" key={profile.id}>
-                  <td className="px-4 py-4 font-bold text-graphite">{profile.full_name}</td>
-                  <td className="px-4 py-4 text-muted">{profile.email}</td>
-                  <td className="px-4 py-4">
-                    <span className={`inline-flex rounded-full px-3 py-1 text-xs font-bold ring-1 ${roleClasses[profile.role]}`}>
-                      {roleLabels[profile.role]}
-                    </span>
-                  </td>
-                  <td className="px-4 py-4 text-muted">{profile.sector_id || "-"}</td>
-                  <td className="px-4 py-4">
-                    <span className={`inline-flex rounded-full px-3 py-1 text-xs font-bold ${profile.active ? "bg-lime/20 text-graphite ring-1 ring-lime/50" : "bg-coral/15 text-coral ring-1 ring-coral/40"}`}>
-                      {profile.active ? "Ativo" : "Inativo"}
-                    </span>
-                  </td>
-                  <td className="px-4 py-4 text-muted">{new Date(profile.created_at).toLocaleString("pt-BR")}</td>
-                  <td className="px-4 py-4">
-                    <div className="flex gap-2">
-                      <button
-                        aria-label={`Editar ${profile.full_name}`}
-                        className="focus-ring grid h-9 w-9 place-items-center rounded-lg text-soda hover:bg-soda/10"
-                        onClick={() => {
-                          setEditing(profile);
-                          setModalOpen(true);
-                        }}
-                        type="button"
-                      >
-                        <Edit3 className="h-4 w-4" />
-                      </button>
-                      <button
-                        aria-label={`Desativar ${profile.full_name}`}
-                        className="focus-ring grid h-9 w-9 place-items-center rounded-lg text-coral hover:bg-coral/10 disabled:cursor-not-allowed disabled:opacity-40"
-                        disabled={!profile.active}
-                        onClick={() => void deactivateProfile(profile)}
-                        type="button"
-                      >
-                        <UserX className="h-4 w-4" />
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))
-            )}
-          </tbody>
-        </table>
+      <section className="mt-6 overflow-x-auto rounded-[28px] border border-white/[0.08] bg-charcoal shadow-panel">
+        <div
+          className="hidden border-b border-white/[0.06] px-5 py-3 text-[11px] font-bold uppercase tracking-[0.16em] text-muted md:grid md:min-w-[1130px] md:items-center md:gap-4"
+          style={{ gridTemplateColumns: userGridTemplateColumns }}
+        >
+          {userColumnLabels.map((label) => (
+            <div className={label === "Ações" ? "text-right" : undefined} key={label}>
+              {label}
+            </div>
+          ))}
+        </div>
+
+        {loading ? (
+          <p className="px-5 py-4 text-sm text-muted">Carregando usuários...</p>
+        ) : filtered.length === 0 ? (
+          <p className="px-5 py-4 text-sm text-muted">Nenhum usuário encontrado.</p>
+        ) : (
+          filtered.map((profile) => (
+            <UserListRow
+              key={profile.id}
+              onDeactivate={() => void deactivateProfile(profile)}
+              onEdit={() => {
+                setEditing(profile);
+                setModalOpen(true);
+              }}
+              profile={profile}
+              sectorName={profile.sector_id ? sectorsById.get(profile.sector_id) || profile.sector_id : "-"}
+            />
+          ))
+        )}
       </section>
 
       {modalOpen ? (
@@ -266,5 +269,91 @@ export default function UsuariosPage() {
         />
       ) : null}
     </main>
+  );
+}
+
+function UserListRow({
+  onDeactivate,
+  onEdit,
+  profile,
+  sectorName
+}: {
+  onDeactivate: () => void;
+  onEdit: () => void;
+  profile: Profile;
+  sectorName: string;
+}) {
+  return (
+    <div
+      className="border-b border-white/[0.06] px-5 py-4 transition hover:bg-white/[0.04] last:border-b-0 md:grid md:min-w-[1130px] md:items-center md:gap-4"
+      style={{ gridTemplateColumns: userGridTemplateColumns }}
+    >
+      <div className="flex min-w-0 items-center gap-4">
+        <div className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-soda/15 text-sm font-bold text-soda">
+          {profile.full_name.slice(0, 2).toUpperCase()}
+        </div>
+        <div className="min-w-0">
+          <p className="truncate text-sm font-semibold text-white">{profile.full_name}</p>
+          <p className="mt-1 text-xs font-semibold uppercase tracking-[0.12em] text-muted md:hidden">Nome</p>
+        </div>
+      </div>
+
+      <UserTextCell label="Email" value={profile.email} />
+      <UserBadgeCell label="Role">
+        <Badge className={badgeClassName} variant="neutral">
+          {roleLabels[profile.role]}
+        </Badge>
+      </UserBadgeCell>
+      <UserTextCell label="Setor" value={sectorName} />
+      <UserBadgeCell label="Ativo">
+        <Badge className={badgeClassName} variant={profile.active ? "success" : "neutral"}>
+          {profile.active ? "Ativo" : "Inativo"}
+        </Badge>
+      </UserBadgeCell>
+      <UserTextCell label="Criado em" value={new Date(profile.created_at).toLocaleString("pt-BR")} />
+
+      <div className="mt-4 flex items-center justify-between gap-3 md:mt-0 md:justify-end">
+        <span className="text-xs font-semibold uppercase tracking-[0.12em] text-muted md:hidden">Ações</span>
+        <div className="flex gap-2">
+          <Button
+            aria-label={`Editar ${profile.full_name}`}
+            className="grid h-9 w-9 place-items-center rounded-full text-muted transition hover:bg-white/10 hover:text-soda"
+            onClick={onEdit}
+            size="icon"
+            variant="ghost"
+          >
+            <Edit3 className="h-4 w-4" />
+          </Button>
+          <Button
+            aria-label={`Desativar ${profile.full_name}`}
+            className="grid h-9 w-9 place-items-center rounded-full text-muted transition hover:bg-coral/10 hover:text-coral disabled:pointer-events-none disabled:opacity-40"
+            disabled={!profile.active}
+            onClick={onDeactivate}
+            size="icon"
+            variant="ghost"
+          >
+            <UserX className="h-4 w-4" />
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function UserTextCell({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="mt-4 flex min-w-0 items-center justify-between gap-4 md:mt-0 md:block">
+      <span className="text-xs font-semibold uppercase tracking-[0.12em] text-muted md:hidden">{label}</span>
+      <span className="truncate text-sm text-muted">{value}</span>
+    </div>
+  );
+}
+
+function UserBadgeCell({ children, label }: { children: ReactNode; label: string }) {
+  return (
+    <div className="mt-4 flex items-center justify-between gap-4 md:mt-0 md:block">
+      <span className="text-xs font-semibold uppercase tracking-[0.12em] text-muted md:hidden">{label}</span>
+      {children}
+    </div>
   );
 }

@@ -1,5 +1,6 @@
 ﻿package com.example.barreplenishment.core.data
 
+import android.util.Log
 import androidx.room.withTransaction
 import com.example.barreplenishment.core.database.AppDatabase
 import com.example.barreplenishment.core.database.ProductEntity
@@ -15,6 +16,19 @@ class BarRepository(private val db: AppDatabase) {
     suspend fun seedIfNeeded() {
         if (productDao.count() > 0) return
         productDao.upsertAll(seedProducts())
+    }
+
+    suspend fun replaceProducts(products: List<ProductEntity>) {
+        db.withTransaction {
+            productDao.deleteAll()
+            if (products.isNotEmpty()) {
+                productDao.upsertAll(products)
+            }
+        }
+    }
+
+    suspend fun clearProducts() {
+        productDao.deleteAll()
     }
 
     suspend fun products(category: String = "Todos", query: String = ""): List<ProductEntity> {
@@ -41,20 +55,20 @@ class BarRepository(private val db: AppDatabase) {
     suspend fun createRequest(createdBy: String, priority: String, notes: String, lines: List<CartLine>, online: Boolean): String {
         require(lines.isNotEmpty()) { "Uma solicitação precisa ter pelo menos um item." }
         val now = System.currentTimeMillis()
-        val id = "BAR-" + now.toString().takeLast(7)
-        val syncState = if (online) SyncState.Synced else SyncState.WaitingUpload
+        val id = UUID.randomUUID().toString()
+        val sectorId = lines.first().product.sectorId
         val request = ReplenishmentRequestEntity(
             id = id,
             restaurantUnitId = "main",
-            sectorId = "bar",
-            createdBy = createdBy.ifBlank { "responsável_bar" },
+            sectorId = sectorId,
+            createdBy = createdBy,
             priority = priority,
             status = RequestStatus.Pending,
             notes = notes,
             createdAt = now,
             updatedAt = now,
-            syncedAt = if (online) now else null,
-            syncState = syncState
+            syncedAt = null,
+            syncState = SyncState.WaitingUpload
         )
         val items = lines.map { line ->
             require(line.quantity > 0) { "Quantidade deve ser maior que zero." }
@@ -72,6 +86,7 @@ class BarRepository(private val db: AppDatabase) {
             requestDao.upsertItems(items)
             requestDao.upsertEvent(event(id, RequestStatus.Pending, "Solicitação criada", request.createdBy, now))
         }
+        Log.d("BarSync", "createRequest: id=${id} items.size=${items.size}")
         return id
     }
 
@@ -88,20 +103,21 @@ class BarRepository(private val db: AppDatabase) {
                 id = id,
                 status = status,
                 updatedAt = now,
-                syncState = if (online) SyncState.Synced else SyncState.WaitingUpload,
-                syncedAt = if (online) now else null
+                syncState = SyncState.WaitingUpload,
+                syncedAt = null
             )
-            requestDao.upsertEvent(event(id, status, message, user.ifBlank { "responsável_bar" }, now))
+            requestDao.upsertEvent(event(id, status, message, user, now))
         }
     }
 
     suspend fun markSynced(id: String) = requestDao.markSynced(id, System.currentTimeMillis())
 
-    private suspend fun details(request: ReplenishmentRequestEntity): RequestWithDetails = RequestWithDetails(
-        request = request,
-        items = requestDao.itemsFor(request.id),
-        events = requestDao.eventsFor(request.id)
-    )
+    private suspend fun details(request: ReplenishmentRequestEntity): RequestWithDetails {
+        val items = requestDao.itemsFor(request.id)
+        val events = requestDao.eventsFor(request.id)
+        Log.d("BarSync", "details: requestId=${request.id} items=${items.size} events=${events.size}")
+        return RequestWithDetails(request = request, items = items, events = events)
+    }
 
     private fun event(requestId: String, status: String, message: String, user: String, now: Long) = RequestStatusEventEntity(
         id = UUID.randomUUID().toString(),
