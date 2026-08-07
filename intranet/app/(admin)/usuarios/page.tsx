@@ -225,9 +225,9 @@ export default function UsuariosPage() {
         </p>
       ) : null}
 
-      <section className="mt-6 overflow-hidden rounded-[28px] border border-white/[0.08] bg-charcoal shadow-panel">
+      <section className="mt-6 overflow-x-auto rounded-[28px] border border-white/[0.08] bg-charcoal shadow-panel">
         <div
-          className="hidden border-b border-white/[0.06] px-5 py-3 text-[11px] font-bold uppercase tracking-[0.16em] text-muted md:grid md:items-center md:gap-4"
+          className="hidden border-b border-white/[0.06] px-5 py-3 text-[11px] font-bold uppercase tracking-[0.16em] text-muted md:grid md:min-w-[1130px] md:items-center md:gap-4"
           style={{ gridTemplateColumns: userGridTemplateColumns }}
         >
           {userColumnLabels.map((label) => (
@@ -285,7 +285,7 @@ function UserListRow({
 }) {
   return (
     <div
-      className="border-b border-white/[0.06] px-5 py-4 transition hover:bg-white/[0.04] last:border-b-0 md:grid md:items-center md:gap-4"
+      className="border-b border-white/[0.06] px-5 py-4 transition hover:bg-white/[0.04] last:border-b-0 md:grid md:min-w-[1130px] md:items-center md:gap-4"
       style={{ gridTemplateColumns: userGridTemplateColumns }}
     >
       <div className="flex min-w-0 items-center gap-4">

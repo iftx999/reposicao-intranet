@@ -223,9 +223,9 @@ export default function EstoquePage() {
         </p>
       ) : null}
 
-      <section className="mt-6 overflow-hidden rounded-[28px] border border-white/[0.08] bg-charcoal shadow-panel">
+      <section className="mt-6 overflow-x-auto rounded-[28px] border border-white/[0.08] bg-charcoal shadow-panel">
         <div
-          className="hidden border-b border-white/[0.06] px-5 py-3 text-[11px] font-bold uppercase tracking-[0.16em] text-muted md:grid md:items-center md:gap-4"
+          className="hidden border-b border-white/[0.06] px-5 py-3 text-[11px] font-bold uppercase tracking-[0.16em] text-muted md:grid md:min-w-[960px] md:items-center md:gap-4"
           style={{ gridTemplateColumns: stockGridTemplateColumns }}
         >
           {["Nome", "Setor", "Categoria", "Atual", "Mínimo", "Situação", ""].map((label) => (
@@ -291,7 +291,7 @@ function StockProductRow({
   return (
     <button
       aria-label={`Ver histórico de movimentos de ${product.name}`}
-      className="w-full border-b border-white/[0.06] px-5 py-4 text-left transition hover:bg-white/[0.04] last:border-b-0 md:grid md:items-center md:gap-4"
+      className="w-full border-b border-white/[0.06] px-5 py-4 text-left transition hover:bg-white/[0.04] last:border-b-0 md:grid md:min-w-[960px] md:items-center md:gap-4"
       onClick={onOpenHistory}
       style={{ gridTemplateColumns: stockGridTemplateColumns }}
       type="button"
@@ -355,7 +355,7 @@ function HistoryPanel({
 
           <div className="mt-6 overflow-auto">
             <div
-              className="hidden border-b border-white/[0.06] py-3 text-[11px] font-bold uppercase tracking-[0.16em] text-muted md:grid md:items-center md:gap-4"
+              className="hidden border-b border-white/[0.06] py-3 text-[11px] font-bold uppercase tracking-[0.16em] text-muted md:grid md:min-w-[900px] md:items-center md:gap-4"
               style={{ gridTemplateColumns: movementGridTemplateColumns }}
             >
               {["Data", "Tipo", "Delta", "Saldo", "Origem", "Motivo", "Quem fez"].map((label) => (
@@ -370,7 +370,7 @@ function HistoryPanel({
             ) : (
               movements.map((movement) => (
                 <div
-                  className="border-b border-white/[0.06] py-4 last:border-b-0 md:grid md:items-center md:gap-4"
+                  className="border-b border-white/[0.06] py-4 last:border-b-0 md:grid md:min-w-[900px] md:items-center md:gap-4"
                   key={movement.id}
                   style={{ gridTemplateColumns: movementGridTemplateColumns }}
                 >

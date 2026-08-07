@@ -28,9 +28,9 @@ const dangerButtonClassName =
 const badgeClassName = "h-auto px-2.5 py-1 text-[11px] font-semibold";
 
 const requestGridTemplateColumns =
-  "minmax(110px,0.8fr) minmax(150px,1fr) minmax(170px,1.1fr) minmax(110px,0.8fr) minmax(130px,0.9fr) minmax(170px,1fr)";
+  "minmax(150px,1fr) minmax(170px,1.1fr) minmax(110px,0.8fr) minmax(130px,0.9fr) minmax(170px,1fr)";
 
-const requestColumnLabels = ["ID", "Setor", "Criado por", "Prioridade", "Status", "Data"];
+const requestColumnLabels = ["Setor", "Criado por", "Prioridade", "Status", "Data"];
 const validStatusFilters: RequestStatus[] = ["pending", "in_separation", "replenished", "cancelled"];
 
 const statusBadgeVariants: Record<RequestStatus, "success" | "warning" | "destructive"> = {
@@ -141,7 +141,9 @@ export default function SolicitacoesPage() {
   }
 
   return (
-    <main className="mx-auto grid min-h-screen max-w-7xl gap-6 bg-graphite px-6 py-8 xl:grid-cols-[1fr_420px]">
+    // minmax(0,1fr) e obrigatorio: 1fr tem min-width auto e nao encolhe abaixo
+    // do minimo da tabela (840px), o que empurrava o aside para fora da tela.
+    <main className="mx-auto grid min-h-screen max-w-7xl gap-6 bg-graphite px-6 py-8 xl:grid-cols-[minmax(0,1fr)_420px]">
       <section>
         <div className="flex flex-wrap items-end justify-between gap-4">
           <div>
@@ -171,9 +173,9 @@ export default function SolicitacoesPage() {
           </p>
         ) : null}
 
-        <section className="mt-6 overflow-hidden rounded-[28px] border border-white/[0.08] bg-charcoal shadow-panel">
+        <section className="mt-6 overflow-x-auto rounded-[28px] border border-white/[0.08] bg-charcoal shadow-panel">
           <div
-            className="hidden border-b border-white/[0.06] px-5 py-3 text-[11px] font-bold uppercase tracking-[0.16em] text-muted md:grid md:items-center md:gap-4"
+            className="hidden border-b border-white/[0.06] px-5 py-3 text-[11px] font-bold uppercase tracking-[0.16em] text-muted md:grid md:min-w-[840px] md:items-center md:gap-4"
             style={{ gridTemplateColumns: requestGridTemplateColumns }}
           >
             {requestColumnLabels.map((label) => (
@@ -277,15 +279,11 @@ export default function SolicitacoesPage() {
 function RequestListRow({ onOpen, request }: { onOpen: () => void; request: ReplenishmentRequest }) {
   return (
     <button
-      className="block w-full cursor-pointer border-b border-white/[0.06] px-5 py-4 text-left transition hover:bg-white/[0.04] last:border-b-0 md:grid md:items-center md:gap-4"
+      className="block w-full cursor-pointer border-b border-white/[0.06] px-5 py-4 text-left transition hover:bg-white/[0.04] last:border-b-0 md:grid md:min-w-[840px] md:items-center md:gap-4"
       onClick={onOpen}
       style={{ gridTemplateColumns: requestGridTemplateColumns }}
       type="button"
     >
-      <div className="min-w-0">
-        <span className="block truncate font-mono text-xs text-muted">{request.id.slice(0, 8)}</span>
-        <span className="mt-1 block text-xs font-semibold uppercase tracking-[0.12em] text-muted md:hidden">ID</span>
-      </div>
       <RequestTextCell label="Setor" value={request.sector_id} />
       <RequestTextCell label="Criado por" value={request.created_by || "-"} />
       <RequestBadgeCell label="Prioridade">

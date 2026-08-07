@@ -66,6 +66,17 @@ export type StockMovement = {
   created_at: string;
 };
 
+export type StockMovementDaily = {
+  company_id: string;
+  product_id: string;
+  sector_id: string;
+  dia: string;
+  movement_type: StockMovementType;
+  source: StockMovementSource;
+  total_delta: number;
+  qtd_movimentos: number;
+};
+
 export type UserRole = "admin" | "gestor" | "operador";
 
 export type Profile = {
