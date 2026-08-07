@@ -427,7 +427,10 @@ function MovementModal({
   const title = movementTitle[movementType];
   const amountLabel = movementType === "ajuste" ? "Nova quantidade contada" : "Quantidade";
   const numericAmount = Number(amount);
-  const validAmount = Number.isFinite(numericAmount) && numericAmount >= 0 && (movementType === "ajuste" || numericAmount > 0);
+  // Number.isInteger deixa a regra no codigo, e nao so no atributo step do input:
+  // colar "1.5" ou alterar o HTML nao passa mais pela confirmacao.
+  const validAmount =
+    Number.isInteger(numericAmount) && numericAmount >= 0 && (movementType === "ajuste" || numericAmount > 0);
   const delta = selectedProduct && validAmount ? getMovementDelta(selectedProduct, movementType, numericAmount) : null;
   const resultingBalance = selectedProduct && delta !== null ? selectedProduct.quantity + delta : null;
 
@@ -561,10 +564,14 @@ function MovementModal({
                   <Input
                     className={fieldClassName}
                     id={amountId}
+                    inputMode="numeric"
                     min={0}
                     onChange={(event) => updateAmount(event.target.value)}
                     required
-                    step="0.01"
+                    // Todas as unidades do catalogo sao contaveis (COPO, DOSE,
+                    // GARRAFA, LATA, LONG NECK, UN, PORCAO). Passo 1 mantem as
+                    // setas e o teclado numerico em unidades inteiras.
+                    step="1"
                     type="number"
                     value={amount}
                   />
